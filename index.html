@@ -1,0 +1,3349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oh No Zombies</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap');
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(180deg, #064e3b 0%, #022c22 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, .brand-title {
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    .top-bar {
+      background: linear-gradient(90deg, #451a03 0%, #78350f 50%, #451a03 100%);
+      border-bottom: 4px solid #fbbf24;
+      padding: 8px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+      z-index: 25;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fde047;
+      text-shadow: 1px 2px 0 #451a03;
+    }
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      background: rgba(0, 0, 0, 0.38);
+      border: 2px solid #92400e;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .game-btn {
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+      transition: transform 0.1s ease, filter 0.15s ease;
+    }
+    .game-btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+    .game-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35); }
+
+    /* Main 2-Column Game Layout */
+    #mainGameArena {
+      flex: 1;
+      max-width: 1540px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+    @media (max-width: 980px) {
+      #mainGameArena {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Pronunciation & Riddle Studio Card */
+    .pronounce-panel {
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      color: #1e293b;
+      border: 4px solid #92400e;
+      border-radius: 22px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .flashcard-stage {
+      background: #ffffff;
+      border: 3px solid #f59e0b;
+      border-radius: 18px;
+      padding: 14px 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 185px;
+      box-shadow: inset 0 2px 8px rgba(245, 158, 11, 0.12);
+    }
+
+    /* Right Lawn & Seed Tray Column */
+    .lawn-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .seed-tray {
+      background: linear-gradient(180deg, #78350f 0%, #451a03 100%);
+      border: 4px solid #b45309;
+      border-radius: 18px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .sun-bank-badge {
+      background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
+      color: #451a03;
+      border: 3px solid #ca8a04;
+      border-radius: 14px;
+      padding: 6px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 78px;
+      box-shadow: 0 3px 0 #854d0e;
+    }
+
+    .seed-cards-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .seed-card {
+      background: linear-gradient(180deg, #ecfdf5 0%, #bbf7d0 100%);
+      color: #064e3b;
+      border: 3px solid #16a34a;
+      border-radius: 12px;
+      padding: 5px 8px;
+      min-width: 68px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .seed-card.selected {
+      border-color: #facc15;
+      background: linear-gradient(180deg, #fef9c3 0%, #fde047 100%);
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.55);
+    }
+    .seed-card.disabled {
+      opacity: 0.52;
+      filter: grayscale(0.45);
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      flex: 1;
+      min-height: 360px;
+      background: #14532d;
+      border: 5px solid #78350f;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    }
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .lawn-footer-bar {
+      background: rgba(15, 23, 42, 0.72);
+      border: 2px solid #334155;
+      border-radius: 14px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    /* Modals & Inputs */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 60;
+    }
+    .modal-backdrop.hidden, .hidden {
+      display: none !important;
+    }
+    .modal-box {
+      background: #fffbeb;
+      color: #1e293b;
+      border: 4px solid #92400e;
+      border-radius: 22px;
+      padding: 18px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+    }
+    .input-field {
+      width: 100%;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #0f172a;
+      background: #ffffff;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #f59e0b;
+    }
+
+    /* Toast Notification */
+    .toast-banner {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: #064e3b;
+      color: #ecfdf5;
+      border: 2px solid #34d399;
+      border-radius: 14px;
+      padding: 10px 16px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      z-index: 90;
+      animation: toastSlideIn 0.2s ease-out;
+    }
+    .toast-banner.error {
+      background: #7f1d1d;
+      border-color: #f87171;
+      color: #fef2f2;
+    }
+    @keyframes toastSlideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Classroom Live Monitor & QR Code Styles */
+    .teacher-lawn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 14px;
+    }
+    .student-lawn-card {
+      background: #ffffff;
+      border: 3px solid #cbd5e1;
+      border-radius: 18px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .student-lawn-card:hover {
+      transform: translateY(-2px);
+      border-color: #10b981;
+    }
+    .student-lawn-card.danger {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+    .qr-box-high-contrast {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 18px;
+      border: 4px solid #0f172a;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+  <!-- High-Scanability QR Code Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION & TEACHER TOOLBAR -->
+  <header class="top-bar">
+    <div class="brand-title">
+      <span id="headerBrandIcon">🌻</span>
+      <span>Oh No Zombies</span>
+      <span id="roleBadge" style="font-size:0.72rem;background:#059669;color:#fff;padding:2px 8px;border-radius:999px;border:1.5px solid #a7f3d0;margin-left:4px;">Solo Mode</span>
+    </div>
+
+    <div class="header-stats">
+      <div class="stat-pill" title="Words & Questions Pronounced Correctly">
+        <span>🗣️ Mastered:</span>
+        <span id="wordsMasteredCount" style="color:#4ade80;">0</span>
+      </div>
+      <div class="stat-pill" title="Current Correct Streak">
+        <span>🔥 Streak:</span>
+        <span id="streakCount" style="color:#facc15;">0</span>
+      </div>
+      <div class="stat-pill">
+        <span>🌊 Wave:</span>
+        <span id="waveText">1 / 3</span>
+      </div>
+    </div>
+
+    <div id="topToolbarButtons" class="flex items-center gap-2 flex-wrap">
+      <button id="btnClassroomHost" class="game-btn" style="background:linear-gradient(135deg,#10b981,#047857);color:#fff;padding:6px 12px;font-size:0.8rem;border-color:#a7f3d0;" title="Host a Live Classroom Session with QR Code & Live Lawns">
+        <span>🏫</span><span>Classroom Live</span>
+      </button>
+      <button id="btnStudentJoinModal" class="game-btn" style="background:#2563eb;color:#fff;padding:6px 12px;font-size:0.8rem;border-color:#93c5fd;" title="Join a Teacher's Classroom Room">
+        <span>🎓</span><span>Join Class</span>
+      </button>
+      <button id="btnPackManager" class="game-btn" style="background:#0d9488;color:#fff;padding:6px 12px;font-size:0.8rem;" title="Export or Import Unified JSON Pack (Icons + Questions)">
+        <span>📦</span><span>Export / Import Pack</span>
+      </button>
+      <button id="btnCustomizeIcons" class="game-btn" style="background:#db2777;color:#fff;padding:6px 12px;font-size:0.8rem;">
+        <span>🎨</span><span>Game Icons</span>
+      </button>
+      <button id="btnCustomStudio" class="game-btn" style="background:#4f46e5;color:#fff;padding:6px 12px;font-size:0.8rem;">
+        <span>📝</span><span>Custom Questions</span>
+      </button>
+      <button id="btnPause" class="game-btn" style="background:#d97706;color:#fff;padding:6px 11px;font-size:0.8rem;">
+        <span id="pauseIcon">⏸️</span><span id="pauseLabel">Pause</span>
+      </button>
+      <button id="btnMute" class="game-btn" style="background:#334155;color:#fff;padding:6px 10px;font-size:0.8rem;" title="Toggle Audio">
+        🔊
+      </button>
+    </div>
+  </header>
+
+  <!-- TEACHER LIVE CLASSROOM DASHBOARD (SHOWN WHEN HOSTING CLASSROOM) -->
+  <section id="teacherDashboardSection" class="hidden" style="flex:1;padding:14px;max-width:1600px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:14px;">
+    <div style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border:4px solid #92400e;border-radius:22px;padding:16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 10px 25px rgba(0,0,0,0.4);">
+      <div style="flex:1;min-width:260px;">
+        <div class="flex items-center gap-2 flex-wrap" style="margin-bottom:6px;">
+          <span style="background:#059669;color:#fff;font-size:0.75rem;font-weight:900;padding:3px 10px;border-radius:999px;text-transform:uppercase;">🏫 Live Teacher Command Center</span>
+          <span id="teacherSessionStatusBadge" style="background:#f59e0b;color:#451a03;font-size:0.75rem;font-weight:900;padding:3px 10px;border-radius:999px;">⏳ Waiting for Students</span>
+        </div>
+        <h2 style="font-size:1.55rem;font-weight:900;color:#451a03;margin-bottom:4px;">
+          Room Code: <span id="teacherRoomCodeDisplay" style="font-family:monospace;background:#451a03;color:#fde047;padding:2px 12px;border-radius:10px;letter-spacing:3px;">-----</span>
+        </h2>
+        <p style="font-size:0.84rem;color:#78350f;font-weight:700;line-height:1.4;margin-bottom:12px;">
+          Students scan the QR code or click <strong>Join Class</strong> with the Room Code. Students cannot play until you press <strong>Play</strong> below, and their self-approve button is disabled.
+        </p>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btnTeacherStartClass" class="game-btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:11px 22px;font-size:1rem;border:3px solid #a7f3d0;">
+            ▶️ Start Class Game (Unlock Students)
+          </button>
+          <button id="btnTeacherPauseClass" class="game-btn hidden" style="background:#d97706;color:#fff;padding:11px 18px;font-size:0.95rem;">
+            ⏸️ Pause All Students
+          </button>
+          <button id="btnRefreshStudentLawns" class="game-btn" style="background:#059669;color:#fff;padding:11px 14px;font-size:0.85rem;border-color:#a7f3d0;">
+            🔄 Refresh Lawns
+          </button>
+          <button id="btnShowBigQrModal" class="game-btn" style="background:#1e293b;color:#fde047;padding:11px 16px;font-size:0.9rem;border-color:#facc15;">
+            📱 Enlarge QR Code
+          </button>
+          <button id="btnCopyRoomLink" class="game-btn" style="background:#0284c7;color:#fff;padding:11px 14px;font-size:0.85rem;">
+            🔗 Copy Join Link
+          </button>
+          <button id="btnCopyJoinPageOnlyLink" class="game-btn" style="background:#2563eb;color:#fff;padding:11px 14px;font-size:0.85rem;">
+            🎓 Copy Student Join Page
+          </button>
+          <label class="flex items-center gap-1" style="background:#fff;border:2px solid #92400e;border-radius:12px;padding:7px 12px;font-size:0.84rem;font-weight:900;color:#451a03;">
+            <span>🌊 Class Waves:</span>
+            <select id="teacherWavesSelect" style="background:#fef3c7;color:#451a03;border:1.5px solid #f59e0b;border-radius:8px;padding:3px 8px;font-weight:900;">
+              <option value="3" selected>3 Waves (Quick)</option>
+              <option value="5">5 Waves (Standard)</option>
+              <option value="8">8 Waves (Extended)</option>
+              <option value="10">10 Waves (Marathon)</option>
+              <option value="999">Endless Practice</option>
+            </select>
+          </label>
+          <button id="btnExitTeacherMode" class="game-btn" style="background:#fee2e2;color:#991b1b;border-color:#fca5a5;padding:11px 14px;font-size:0.85rem;box-shadow:none;">
+            🚪 End Session
+          </button>
+        </div>
+      </div>
+
+      <!-- Inline High-Scanability QR Code Box -->
+      <div class="qr-box-high-contrast" style="flex-shrink:0;">
+        <div id="teacherInlineQrContainer" style="width:168px;height:168px;display:flex;align-items:center;justify-content:center;"></div>
+        <span style="font-size:0.72rem;font-weight:900;color:#0f172a;margin-top:6px;">📱 Scan to Join Class</span>
+      </div>
+    </div>
+
+    <!-- Live Student Lawns Grid -->
+    <div style="background:rgba(15,23,42,0.55);border:3px solid #334155;border-radius:20px;padding:14px;">
+      <div class="flex items-center justify-between flex-wrap gap-2" style="margin-bottom:12px;">
+        <h3 style="font-size:1.1rem;font-weight:900;color:#fde047;">
+          🌱 Live Student Lawns (<span id="connectedStudentCount">0</span> Connected)
+        </h3>
+        <span id="teacherSyncModeBadge" style="font-size:0.78rem;font-weight:800;background:#064e3b;color:#a7f3d0;padding:4px 12px;border-radius:999px;border:1.5px solid #34d399;">
+          🔄 Connecting Sync...
+        </span>
+      </div>
+      <div id="teacherLawnsGrid" class="teacher-lawn-grid"></div>
+    </div>
+  </section>
+
+  <!-- DEDICATED FULL-SCREEN STUDENT JOIN CLASS PAGE -->
+  <section id="studentJoinPage" class="hidden" style="flex:1;padding:24px 16px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at top, #065f46 0%, #022c22 100%);">
+    <div style="background:linear-gradient(180deg,#fffbeb 0%,#fef3c7 100%);color:#1e293b;border:5px solid #92400e;border-radius:28px;padding:28px 24px;width:100%;max-width:480px;box-shadow:0 24px 55px rgba(0,0,0,0.55);text-align:center;">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:#dbeafe;color:#1e40af;border:2px solid #93c5fd;border-radius:999px;padding:4px 14px;font-size:0.78rem;font-weight:900;margin-bottom:10px;">
+        🎓 STUDENT CLASSROOM PORTAL
+      </div>
+      <div style="font-size:3.2rem;line-height:1;margin-bottom:8px;">🌻🏡🧟</div>
+      <h2 style="font-size:1.75rem;font-weight:900;color:#451a03;margin-bottom:4px;">Join Your Class Game</h2>
+      <p style="font-size:0.88rem;color:#78350f;font-weight:700;margin-bottom:18px;line-height:1.4;">
+        Enter your name and the 5-letter Room Code from your teacher's screen to join the live lawn!
+      </p>
+
+      <div class="flex flex-col gap-3" style="text-align:left;">
+        <div>
+          <label style="font-size:0.76rem;font-weight:900;color:#78350f;text-transform:uppercase;">Your Name *</label>
+          <input id="inputStudentName" type="text" maxlength="20" autocomplete="off" autocorrect="off" spellcheck="false" class="input-field" style="font-size:1.05rem;padding:12px 14px;margin-top:4px;" placeholder="e.g., Mia, Leo, Alex..." />
+        </div>
+        <div>
+          <label style="font-size:0.76rem;font-weight:900;color:#78350f;text-transform:uppercase;">Classroom Room Code *</label>
+          <input id="inputJoinRoomCode" type="text" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" class="input-field" style="font-family:monospace;text-transform:uppercase;font-size:1.35rem;letter-spacing:4px;text-align:center;padding:12px 14px;margin-top:4px;" placeholder="A7K9P" />
+        </div>
+
+        <button id="btnScanQrWithIpad" type="button" class="game-btn w-full" style="background:#0284c7;color:#fff;padding:12px;font-size:0.95rem;border:2px solid #7dd3fc;">
+          📷 Scan Teacher's QR Code with Camera
+        </button>
+
+        <div id="ipadQrScannerBox" class="hidden" style="background:#0f172a;border:3px solid #38bdf8;border-radius:16px;padding:10px;text-align:center;">
+          <video id="ipadQrVideo" playsinline muted style="width:100%;max-height:220px;border-radius:10px;object-fit:cover;background:#000;"></video>
+          <div style="font-size:0.76rem;color:#bae6fd;font-weight:800;margin-top:6px;">Point your iPad camera at the teacher's QR code...</div>
+          <button id="btnStopIpadScanner" type="button" class="game-btn" style="background:#ef4444;color:#fff;padding:5px 12px;font-size:0.76rem;margin-top:6px;box-shadow:none;">
+            ✖ Close Camera
+          </button>
+        </div>
+
+        <button id="btnConfirmJoinRoom" type="button" class="game-btn w-full" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:15px;font-size:1.1rem;border:3px solid #a7f3d0;margin-top:4px;">
+          🚀 Enter Classroom Lawn
+        </button>
+
+        <button id="btnBackFromJoinPage" type="button" class="game-btn w-full" style="background:#e2e8f0;color:#334155;padding:10px;font-size:0.84rem;box-shadow:none;margin-top:2px;">
+          ⬅️ Back to Solo Practice
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN GAME ARENA (PRONUNCIATION STUDIO + LAWN DEFENSE) -->
+  <main id="mainGameArena">
+    <!-- LEFT: PRONUNCIATION & QUESTION CARD STUDIO -->
+    <aside class="pronounce-panel">
+      <div class="flex items-center justify-between gap-2">
+        <span id="cardPromptType" style="background:#fef3c7;border:2px solid #f59e0b;color:#92400e;font-size:0.75rem;font-weight:900;padding:3px 10px;border-radius:999px;">
+          🗣️ Say the Word
+        </span>
+        <span id="cardRewardBadge" style="background:#dcfce7;border:2px solid #22c55e;color:#166534;font-size:0.78rem;font-weight:900;padding:3px 10px;border-radius:999px;">
+          +50 ☀️
+        </span>
+      </div>
+
+      <!-- Topic Deck Selector -->
+      <div>
+        <label style="font-size:0.72rem;font-weight:900;color:#78350f;text-transform:uppercase;">Topic / Question Deck</label>
+        <select id="topicSelect" class="input-field" style="margin-top:3px;">
+          <option value="traits" selected>🌟 Character Traits (8 Pictures)</option>
+          <option value="custom">📝 My Custom Questions</option>
+          <option value="mix">🌈 Mix: Traits + Custom</option>
+        </select>
+      </div>
+
+      <!-- Flashcard Visual & Prompt -->
+      <div class="flashcard-stage">
+        <div id="cardVisualEmoji" class="hidden" style="font-size:4.2rem;line-height:1;">😎</div>
+        <img id="cardVisualImage" src="https://daniellacnunez-collab.github.io/ohnozombies/cool.JPG" alt="Card visual" style="max-height:130px;max-width:100%;border-radius:12px;object-fit:contain;border:2px solid #fde68a;background:#fff;" />
+        <div id="cardPromptText" style="font-size:1.35rem;font-weight:900;color:#0f172a;line-height:1.25;">Cool</div>
+        <div id="cardHintText" style="font-size:0.78rem;font-weight:700;color:#64748b;">💡 Hint: Starts with C - O - O</div>
+      </div>
+
+      <!-- Speech Feedback Banner -->
+      <div id="speechFeedbackBanner" style="background:#f1f5f9;color:#334155;border-radius:12px;padding:8px 10px;font-size:0.82rem;font-weight:800;text-align:center;">
+        🎤 Click "Speak Answer" or type below to earn Suns!
+      </div>
+
+      <!-- Primary Microphone & Audio Buttons -->
+      <div class="grid grid-cols-2 gap-2">
+        <button id="btnSpeakMic" type="button" class="game-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;padding:11px 10px;font-size:0.9rem;">
+          <span>🎤</span><span>Speak Answer</span>
+        </button>
+        <button id="btnHearWord" type="button" class="game-btn" style="background:#0284c7;color:#fff;padding:11px 10px;font-size:0.9rem;">
+          <span>🔊</span><span>Hear Word</span>
+        </button>
+      </div>
+
+      <!-- Typing Fallback Input -->
+      <div class="flex items-center gap-2">
+        <input id="typedAnswerInput" type="text" class="input-field" placeholder="Or type answer here..." />
+        <button id="btnSubmitTyped" type="button" class="game-btn" style="background:#16a34a;color:#fff;padding:9px 14px;font-size:0.85rem;">
+          Check
+        </button>
+      </div>
+
+      <!-- Teacher Override & Skip Controls -->
+      <div class="flex items-center justify-between gap-2 pt-1" style="border-top:2px dashed #fde68a;">
+        <button id="btnTeacherApprove" type="button" class="game-btn" style="background:#10b981;color:#fff;padding:7px 11px;font-size:0.76rem;flex:1;">
+          ✅ Teacher: Mark Correct
+        </button>
+        <button id="btnSkipCard" type="button" class="game-btn" style="background:#e2e8f0;color:#334155;padding:7px 11px;font-size:0.76rem;box-shadow:none;">
+          ⏭️ Skip
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT: SEED TRAY + LAWN CANVAS + FOOTER -->
+    <div class="lawn-column">
+      <!-- Seed Packet Tray -->
+      <div class="seed-tray">
+        <div class="sun-bank-badge">
+          <span id="sunBankIcon" style="font-size:1.35rem;line-height:1;">☀️</span>
+          <span id="sunCounter" style="font-size:1.15rem;font-weight:900;">125</span>
+        </div>
+
+        <div class="seed-cards-row">
+          <button type="button" class="seed-card selected" data-plant="sunflower" title="Sunflower: Produces extra Suns">
+            <span class="seed-emoji" style="font-size:1.45rem;">🌻</span>
+            <span style="font-size:0.7rem;font-weight:900;">Sunflower</span>
+            <span style="font-size:0.72rem;font-weight:900;color:#b45309;">50 ☀️</span>
+          </button>
+          <button type="button" class="seed-card" data-plant="peashooter" title="Peashooter: Shoots peas at zombies">
+            <span class="seed-emoji" style="font-size:1.45rem;">🌱</span>
+            <span style="font-size:0.7rem;font-weight:900;">Peashooter</span>
+            <span style="font-size:0.72rem;font-weight:900;color:#b45309;">100 ☀️</span>
+          </button>
+          <button type="button" class="seed-card" data-plant="wallnut" title="Wall-nut: High-HP defensive shield">
+            <span class="seed-emoji" style="font-size:1.45rem;">🥔</span>
+            <span style="font-size:0.7rem;font-weight:900;">Wall-nut</span>
+            <span style="font-size:0.72rem;font-weight:900;color:#b45309;">50 ☀️</span>
+          </button>
+          <button type="button" class="seed-card" data-plant="snowpea" title="Snow Pea: Slows zombies with icy peas">
+            <span class="seed-emoji" style="font-size:1.45rem;">❄️</span>
+            <span style="font-size:0.7rem;font-weight:900;">Snow Pea</span>
+            <span style="font-size:0.72rem;font-weight:900;color:#b45309;">175 ☀️</span>
+          </button>
+          <button type="button" class="seed-card" data-plant="cherrybomb" title="Cherry Bomb: Explodes nearby zombies">
+            <span class="seed-emoji" style="font-size:1.45rem;">🍒</span>
+            <span style="font-size:0.7rem;font-weight:900;">Cherry Bomb</span>
+            <span style="font-size:0.72rem;font-weight:900;color:#b45309;">150 ☀️</span>
+          </button>
+        </div>
+
+        <button type="button" id="toolShovel" class="seed-card" style="background:#fee2e2;border-color:#ef4444;color:#991b1b;" title="Dig up a plant">
+          <span style="font-size:1.45rem;">⛏️</span>
+          <span style="font-size:0.7rem;font-weight:900;">Shovel</span>
+          <span style="font-size:0.68rem;font-weight:800;">Remove</span>
+        </button>
+      </div>
+
+      <!-- Interactive Game Lawn Canvas -->
+      <div class="canvas-wrapper">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Start Overlay -->
+        <div id="startOverlay" style="position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px;text-align:center;color:#fff;z-index:15;">
+          <div style="pointer-events:auto;background:rgba(6,78,59,0.92);border:3px solid #fde047;border-radius:18px;padding:10px 20px;max-width:560px;box-shadow:0 10px 25px rgba(0,0,0,0.45);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;">
+            <div style="text-align:left;flex:1;min-width:220px;">
+              <h2 style="font-size:1.15rem;font-weight:900;color:#fde047;margin-bottom:2px;">🏡 Defend the Family House!</h2>
+              <p style="font-size:0.78rem;color:#d1fae5;line-height:1.3;margin:0;">
+                Say words or answer questions to earn <strong>Suns ☀️</strong> and plant defenses!
+              </p>
+            </div>
+            <button id="btnStartGame" class="game-btn" style="background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;padding:10px 20px;font-size:0.95rem;border-color:#bbf7d0;white-space:nowrap;">
+              ▶️ Start Defending!
+            </button>
+          </div>
+        </div>
+
+        <!-- Pause Banner -->
+        <div id="pauseOverlay" class="hidden" style="position:absolute;inset:0;background:rgba(15,23,42,0.75);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:14;">
+          <div style="font-size:2.5rem;margin-bottom:8px;">⏸️ Game Paused</div>
+          <button id="btnResumeOverlay" class="game-btn" style="background:#10b981;color:#fff;padding:10px 24px;font-size:1rem;">▶️ Resume Game</button>
+        </div>
+
+        <!-- Student Waiting for Teacher Overlay -->
+        <div id="studentWaitingOverlay" class="hidden" style="position:absolute;inset:0;background:rgba(6,78,59,0.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff;z-index:18;">
+          <div style="font-size:3.5rem;margin-bottom:8px;">⏳🏫</div>
+          <h2 id="studentWaitingTitle" style="font-size:1.6rem;font-weight:900;color:#fde047;margin-bottom:6px;">Connected to Classroom!</h2>
+          <p id="studentWaitingSub" style="max-width:420px;font-size:0.95rem;color:#d1fae5;line-height:1.5;font-weight:700;">
+            Please wait for your teacher to click <strong>Play</strong> to begin defending your house!
+          </p>
+          <div style="margin-top:14px;background:rgba(0,0,0,0.35);border:2px solid #34d399;border-radius:999px;padding:6px 16px;font-size:0.82rem;font-weight:800;color:#a7f3d0;">
+            Room: <span id="studentWaitingRoomCode">-----</span> • Player: <span id="studentWaitingName">Student</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER CONTROLS: SPEED & DIFFICULTY -->
+      <div class="lawn-footer-bar">
+        <div style="color:#a7f3d0;">💡 Tip: Click falling Suns ☀️ on the lawn to collect bonus energy!</div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <label class="flex items-center gap-1">
+            <span>🌊 Length:</span>
+            <select id="wavesSelect" style="background:#1e293b;color:#fff;border:1.5px solid #475569;border-radius:8px;padding:3px 8px;">
+              <option value="3" selected>3 Waves (Quick)</option>
+              <option value="5">5 Waves (Standard)</option>
+              <option value="8">8 Waves (Extended)</option>
+              <option value="10">10 Waves (Marathon)</option>
+              <option value="999">Endless Mode</option>
+            </select>
+          </label>
+          <label class="flex items-center gap-1">
+            <span>⚡ Speed:</span>
+            <select id="speedSelect" style="background:#1e293b;color:#fff;border:1.5px solid #475569;border-radius:8px;padding:3px 8px;">
+              <option value="0.75">Slow</option>
+              <option value="1" selected>Normal</option>
+              <option value="1.4">Fast</option>
+            </select>
+          </label>
+          <label class="flex items-center gap-1">
+            <span>🎯 Difficulty:</span>
+            <select id="difficultySelect" style="background:#1e293b;color:#fff;border:1.5px solid #475569;border-radius:8px;padding:3px 8px;">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL 1: GAME ICONS & CHARACTER CUSTOMIZER -->
+  <div id="iconsModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:740px;">
+      <div class="flex items-center justify-between" style="border-bottom:2px solid #fde68a;padding-bottom:10px;margin-bottom:12px;">
+        <h3 style="font-size:1.3rem;font-weight:900;color:#451a03;">🎨 Game Icons &amp; Character Customizer</h3>
+        <button id="btnCloseIconsModal" style="background:none;border:none;font-size:1.4rem;font-weight:900;cursor:pointer;color:#64748b;">✖</button>
+      </div>
+
+      <!-- Theme Presets -->
+      <div class="flex items-center gap-2 flex-wrap" style="margin-bottom:12px;">
+        <span style="font-size:0.78rem;font-weight:900;color:#78350f;">Quick Themes:</span>
+        <button type="button" class="game-btn icon-preset-btn" data-preset="classic" style="background:#16a34a;color:#fff;padding:5px 10px;font-size:0.76rem;">🌻 Classic Garden</button>
+        <button type="button" class="game-btn icon-preset-btn" data-preset="space" style="background:#4f46e5;color:#fff;padding:5px 10px;font-size:0.76rem;">🚀 Space Defenders</button>
+        <button type="button" class="game-btn icon-preset-btn" data-preset="dino" style="background:#d97706;color:#fff;padding:5px 10px;font-size:0.76rem;">🦕 Dino Island</button>
+        <button type="button" class="game-btn icon-preset-btn" data-preset="ocean" style="background:#0284c7;color:#fff;padding:5px 10px;font-size:0.76rem;">🐠 Ocean Reef</button>
+      </div>
+
+      <div style="background:#fef3c7;border:2px dashed #f59e0b;border-radius:12px;padding:8px 12px;font-size:0.78rem;font-weight:800;color:#78350f;margin-bottom:10px;">
+        📋 <strong>Tip:</strong> Click any row's <strong>Paste Image</strong> box and press <kbd style="background:#fff;border:1px solid #cbd5e1;border-radius:4px;padding:1px 5px;">Ctrl+V</kbd> / <kbd style="background:#fff;border:1px solid #cbd5e1;border-radius:4px;padding:1px 5px;">Cmd+V</kbd> (or upload a file) to replace that icon with a custom picture! All custom images are included when you export JSON.
+      </div>
+
+      <div id="iconsEditorGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2" style="margin-bottom:14px;"></div>
+
+      <div class="flex items-center justify-between flex-wrap gap-2" style="border-top:2px solid #fde68a;padding-top:10px;">
+        <button id="btnResetDefaultIcons" type="button" class="game-btn" style="background:#fee2e2;color:#991b1b;padding:8px 14px;font-size:0.82rem;box-shadow:none;">
+          🔄 Reset Defaults
+        </button>
+        <button id="btnSaveIconsDone" type="button" class="game-btn" style="background:#10b981;color:#fff;padding:8px 18px;font-size:0.88rem;">
+          ✅ Save &amp; Apply Icons
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CUSTOM QUESTIONS & VOCABULARY STUDIO -->
+  <div id="customQuestionsModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:740px;">
+      <div class="flex items-center justify-between" style="border-bottom:2px solid #fde68a;padding-bottom:10px;margin-bottom:12px;">
+        <h3 style="font-size:1.3rem;font-weight:900;color:#451a03;">📝 Custom Questions &amp; Vocabulary Studio</h3>
+        <button id="btnCloseCustomModal" style="background:none;border:none;font-size:1.4rem;font-weight:900;cursor:pointer;color:#64748b;">✖</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" style="background:#fef3c7;padding:12px;border-radius:14px;border:2px solid #f59e0b;margin-bottom:12px;">
+        <div>
+          <label style="font-size:0.74rem;font-weight:900;color:#78350f;">Card Type</label>
+          <select id="newQType" class="input-field">
+            <option value="word">🗣️ Word / Picture Naming</option>
+            <option value="qa">❓ Question / Riddle Q&amp;A</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.74rem;font-weight:900;color:#78350f;">Emoji Sticker</label>
+          <input id="newQEmoji" type="text" maxlength="4" class="input-field" value="🌟" />
+        </div>
+        <div class="sm:col-span-2">
+          <label style="font-size:0.74rem;font-weight:900;color:#78350f;">Picture / Image (Copy &amp; Paste Image Here or Upload)</label>
+          <div id="newQImagePasteZone" tabindex="0" style="margin-top:4px;border:2.5px dashed #f59e0b;background:#fff;border-radius:12px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;cursor:pointer;outline:none;">
+            <div class="flex items-center gap-3">
+              <img id="newQImagePreview" src="" alt="Preview" class="hidden" style="width:54px;height:54px;object-fit:contain;border-radius:8px;border:2px solid #cbd5e1;background:#f8fafc;" />
+              <div id="newQImageStatus" style="font-size:0.8rem;font-weight:800;color:#78350f;">
+                📋 Click here &amp; press <strong>Ctrl+V / Cmd+V</strong> to paste a copied picture!
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="game-btn" style="background:#0284c7;color:#fff;padding:5px 10px;font-size:0.74rem;cursor:pointer;">
+                📁 Browse
+                <input id="newQImageFileInput" type="file" accept="image/*" class="hidden" />
+              </label>
+              <button id="btnClearNewQImage" type="button" class="game-btn hidden" style="background:#fee2e2;color:#991b1b;padding:5px 9px;font-size:0.74rem;box-shadow:none;">
+                ✖ Remove
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="sm:col-span-2">
+          <label style="font-size:0.74rem;font-weight:900;color:#78350f;">Prompt Word or Question *</label>
+          <input id="newQDisplay" type="text" class="input-field" placeholder="e.g., Dinosaur OR What animal says meow?" />
+        </div>
+        <div>
+          <label style="font-size:0.74rem;font-weight:900;color:#78350f;">Correct Spoken/Typed Answer *</label>
+          <input id="newQAnswer" type="text" class="input-field" placeholder="e.g., dinosaur OR cat" />
+        </div>
+        <div>
+          <label style="font-size:0.74rem;font-weight:900;color:#78350f;">Accepted Synonyms (comma-separated)</label>
+          <input id="newQSynonyms" type="text" class="input-field" placeholder="e.g., a cat, kitty" />
+        </div>
+        <div class="sm:col-span-2 flex justify-end">
+          <button id="btnAddCustomQuestion" type="button" class="game-btn" style="background:#4f46e5;color:#fff;padding:8px 18px;font-size:0.86rem;">
+            ➕ Add to Custom Deck
+          </button>
+        </div>
+      </div>
+
+      <div style="font-size:0.84rem;font-weight:900;color:#451a03;margin-bottom:6px;">
+        Saved Custom Cards (<span id="customQuestionsCount">0</span>)
+      </div>
+      <div id="customQuestionsList" style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: UNIFIED JSON PACK EXPORT / IMPORT STUDIO -->
+  <div id="packManagerModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:600px;">
+      <div class="flex items-center justify-between" style="border-bottom:2px solid #fde68a;padding-bottom:10px;margin-bottom:12px;">
+        <h3 style="font-size:1.3rem;font-weight:900;color:#451a03;">📦 Export / Import Lesson &amp; Icon Pack (JSON)</h3>
+        <button id="btnClosePackModal" style="background:none;border:none;font-size:1.4rem;font-weight:900;cursor:pointer;color:#64748b;">✖</button>
+      </div>
+
+      <p style="font-size:0.84rem;color:#475569;font-weight:700;margin-bottom:12px;">
+        Save your custom icons and custom questions into a portable <code>.json</code> file, or load a pack shared by another teacher.
+      </p>
+
+      <div class="flex items-center gap-2 flex-wrap" style="margin-bottom:14px;">
+        <button id="btnDownloadJsonPack" type="button" class="game-btn" style="background:#0d9488;color:#fff;padding:9px 16px;font-size:0.86rem;">
+          ⬇️ Download Full Pack (.json)
+        </button>
+        <label class="game-btn" style="background:#2563eb;color:#fff;padding:9px 16px;font-size:0.86rem;cursor:pointer;">
+          ⬆️ Upload JSON File
+          <input id="inputUploadJsonFile" type="file" accept=".json,application/json" class="hidden" />
+        </label>
+      </div>
+
+      <label style="font-size:0.74rem;font-weight:900;color:#78350f;">Or Paste Pack JSON Below:</label>
+      <textarea id="textareaPackJson" rows="5" class="input-field" style="font-family:monospace;font-size:0.78rem;margin-top:4px;" placeholder='{"icons": {...}, "questions": [...]}'></textarea>
+      <div class="flex justify-end gap-2" style="margin-top:10px;">
+        <button id="btnImportPastedJson" type="button" class="game-btn" style="background:#10b981;color:#fff;padding:8px 18px;font-size:0.86rem;">
+          ✅ Import JSON Pack
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: END OF ROUND VICTORY / GAME OVER MODAL -->
+  <div id="endGameModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:460px;text-align:center;">
+      <h2 id="endGameTitle" style="font-size:1.55rem;font-weight:900;color:#451a03;margin-bottom:8px;">🏆 House Protected!</h2>
+      <p id="endGameMessage" style="font-size:0.92rem;color:#334155;font-weight:700;line-height:1.45;margin-bottom:12px;"></p>
+      <div id="endGameStats" style="background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:10px;font-weight:900;color:#78350f;margin-bottom:14px;"></div>
+      <button id="btnPlayAgain" type="button" class="game-btn w-full" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:12px;font-size:1.05rem;">
+        🔄 Play Again
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 6: BIG HIGH-SCANABILITY QR CODE PROJECTOR MODAL -->
+  <div id="bigQrModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:480px;text-align:center;align-items:center;">
+      <div class="flex items-center justify-between w-full" style="border-bottom:2px solid #fde68a;padding-bottom:8px;margin-bottom:14px;">
+        <h3 style="font-size:1.25rem;font-weight:900;color:#451a03;">📱 Scan QR Code to Join</h3>
+        <button id="btnCloseBigQrModal" style="background:none;border:none;font-size:1.4rem;font-weight:900;cursor:pointer;color:#64748b;">✖</button>
+      </div>
+      <div class="qr-box-high-contrast" style="padding:22px;">
+        <div id="bigQrContainer" style="width:280px;height:280px;display:flex;align-items:center;justify-content:center;"></div>
+      </div>
+      <div style="margin-top:14px;font-size:1.35rem;font-weight:900;color:#451a03;">
+        Room Code: <span id="bigQrRoomCodeText" style="font-family:monospace;background:#451a03;color:#fde047;padding:3px 12px;border-radius:10px;letter-spacing:3px;">-----</span>
+      </div>
+      <p id="bigQrUrlText" style="font-size:0.74rem;color:#64748b;font-weight:700;margin-top:6px;word-break:break-all;"></p>
+    </div>
+  </div>
+
+  <!-- MODAL 7: TEACHER VISIT SINGLE STUDENT LAWN MODAL -->
+  <div id="visitStudentModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:860px;">
+      <div class="flex items-center justify-between" style="border-bottom:2px solid #fde68a;padding-bottom:10px;margin-bottom:10px;">
+        <div class="flex items-center gap-3 flex-wrap">
+          <h3 id="visitStudentTitle" style="font-size:1.3rem;font-weight:900;color:#451a03;">👀 Visiting Student's Lawn</h3>
+          <span id="visitStudentStatsBadge" style="background:#d1fae5;color:#065f46;font-size:0.8rem;font-weight:900;padding:4px 12px;border-radius:999px;">☀️ 100 • 🗣️ 0</span>
+        </div>
+        <button id="btnCloseVisitModal" style="background:none;border:none;font-size:1.5rem;font-weight:900;cursor:pointer;color:#64748b;">✖</button>
+      </div>
+      <div style="background:#052e16;border:4px solid #78350f;border-radius:18px;padding:8px;">
+        <canvas id="visitLawnCanvas" width="760" height="390" style="width:100%;height:auto;border-radius:12px;display:block;"></canvas>
+      </div>
+      <div class="flex items-center justify-between" style="margin-top:10px;">
+        <span id="visitStudentLastWord" style="font-size:0.85rem;font-weight:800;color:#78350f;">Current Card: —</span>
+        <button id="btnDoneVisitModal" type="button" class="game-btn" style="background:#059669;color:#fff;padding:8px 18px;font-size:0.85rem;">
+          ⬅️ Back to All Lawns
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    /*************************************************************************
+     * 0. CLASSROOM MULTIPLAYER & FIREBASE REAL-TIME SYNC ENGINE
+     *************************************************************************/
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'pvz-classroom-app';
+    let db = null;
+    let auth = null;
+    let firebaseUser = null;
+    let unsubGlobalSharedPack = null;
+
+    async function initClassroomBackend() {
+      if (db && firebaseUser) return true;
+      try {
+        if (typeof __firebase_config === 'undefined') return false;
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          const cred = await signInWithCustomToken(auth, __initial_auth_token);
+          firebaseUser = cred.user;
+        } else {
+          const cred = await signInAnonymously(auth);
+          firebaseUser = cred.user;
+        }
+        return true;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    async function publishGlobalSharedDeck() {
+      const payload = buildTeacherRoomDeckFields();
+      // Sync across same-browser tabs immediately
+      try {
+        const globalBc = new BroadcastChannel('pvz_global_shared_deck');
+        globalBc.postMessage({ type: 'global_deck_update', ...payload });
+        globalBc.close();
+      } catch (e) {}
+
+      // Sync across all cloud devices / other people's browsers
+      const hasCloud = await initClassroomBackend();
+      if (hasCloud && db && firebaseUser) {
+        try {
+          const sharedRef = doc(db, 'artifacts', appId, 'public', 'data', 'shared_decks', 'latest');
+          await setDoc(sharedRef, {
+            ...payload,
+            updatedAt: Date.now()
+          }, { merge: true });
+        } catch (e) {
+          console.warn('Global shared deck publish error:', e);
+        }
+      }
+    }
+
+    async function subscribeGlobalSharedDeck() {
+      try {
+        const globalBc = new BroadcastChannel('pvz_global_shared_deck');
+        globalBc.onmessage = (ev) => {
+          const msg = ev.data || {};
+          if (msg.type === 'global_deck_update' && classroom.role !== 'teacher') {
+            applyTeacherDeckPayload(msg);
+          }
+        };
+      } catch (e) {}
+
+      const hasCloud = await initClassroomBackend();
+      if (hasCloud && db && firebaseUser) {
+        const sharedRef = doc(db, 'artifacts', appId, 'public', 'data', 'shared_decks', 'latest');
+        try {
+          const initialSnap = await getDoc(sharedRef);
+          if (initialSnap.exists() && classroom.role !== 'teacher') {
+            applyTeacherDeckPayload(initialSnap.data());
+          }
+        } catch (e) {}
+
+        if (unsubGlobalSharedPack) unsubGlobalSharedPack();
+        unsubGlobalSharedPack = onSnapshot(
+          sharedRef,
+          (docSnap) => {
+            if (docSnap.exists() && classroom.role !== 'teacher') {
+              applyTeacherDeckPayload(docSnap.data());
+            }
+          },
+          (err) => {
+            console.warn('Global shared deck listener error:', err);
+          }
+        );
+      }
+    }
+
+    const classroom = {
+      role: 'solo', // 'solo' | 'teacher' | 'student'
+      roomCode: '',
+      studentId: 'stu_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 9),
+      studentName: 'Student',
+      sessionStatus: 'waiting', // 'waiting' | 'playing' | 'paused'
+      maxWaves: 3,
+      studentsMap: {}, // studentId -> snapshot data
+      visitingStudentId: null,
+      unsubRoom: null,
+      unsubStudents: null,
+      syncInterval: null,
+      hostHeartbeatInterval: null,
+      broadcastChannel: null,
+      qrStream: null,
+      qrScanTimer: null
+    };
+
+    function generateRoomCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
+      return code;
+    }
+
+    function renderHighScanabilityQr(containerEl, urlText, sizePx = 168) {
+      if (!containerEl) return;
+      containerEl.innerHTML = '';
+      if (typeof QRCode !== 'undefined') {
+        new QRCode(containerEl, {
+          text: urlText,
+          width: sizePx,
+          height: sizePx,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H
+        });
+      } else {
+        containerEl.innerHTML = `<div style="font-weight:900;font-size:0.8rem;color:#0f172a;padding:12px;">${urlText}</div>`;
+      }
+    }
+
+    /*************************************************************************
+     * 1. CORE GAME CONSTANTS, ICONS, STATE & CANVAS ENGINE
+     *************************************************************************/
+    const ROWS = 5;
+    const COLS = 9;
+
+    const DEFAULT_GAME_ICONS = {
+      sunflower: { label: 'Sunflower', emoji: '🌻', image: null },
+      peashooter: { label: 'Peashooter', emoji: '🌱', image: null },
+      wallnut: { label: 'Wall-nut', emoji: '🥔', image: null },
+      snowpea: { label: 'Snow Pea', emoji: '❄️', image: null },
+      cherrybomb: { label: 'Cherry Bomb', emoji: '🍒', image: null },
+      zombie_regular: { label: 'Regular Zombie', emoji: '🧟', image: null },
+      zombie_cone: { label: 'Conehead Zombie', emoji: '🧟‍♂️', image: null },
+      zombie_bucket: { label: 'Buckethead Zombie', emoji: '🤖', image: null },
+      sun: { label: 'Sun Token', emoji: '☀️', image: null },
+      lawnmower: { label: 'Lawnmower', emoji: '🚜', image: null },
+      house: { label: 'House', emoji: '🏡', image: null }
+    };
+
+    let gameIcons = JSON.parse(JSON.stringify(DEFAULT_GAME_ICONS));
+    try {
+      const savedIcons = localStorage.getItem('pvz_custom_icons_v1');
+      if (savedIcons) gameIcons = { ...gameIcons, ...JSON.parse(savedIcons) };
+    } catch (e) {}
+
+    const spriteImageCache = {};
+    function getCachedSpriteImage(src) {
+      if (!src) return null;
+      if (!spriteImageCache[src]) {
+        const img = new Image();
+        img.src = src;
+        spriteImageCache[src] = img;
+      }
+      return spriteImageCache[src];
+    }
+
+    const PLANT_CONFIGS = {
+      sunflower: { cost: 50, hp: 100, cooldown: 9000 },
+      peashooter: { cost: 100, hp: 120, cooldown: 1600 },
+      wallnut: { cost: 50, hp: 420, cooldown: 0 },
+      snowpea: { cost: 175, hp: 120, cooldown: 1650 },
+      cherrybomb: { cost: 150, hp: 999, cooldown: 900 }
+    };
+
+    const BUILTIN_DECKS = {
+      traits: [
+        { type: 'word', display: 'Cool', answer: 'cool', synonyms: ['he is cool', 'she is cool', 'very cool'], emoji: '😎', image: 'https://daniellacnunez-collab.github.io/ohnozombies/cool.JPG', hint: 'Starts with C - O - O' },
+        { type: 'word', display: 'Funny', answer: 'funny', synonyms: ['he is funny', 'she is funny', 'so funny'], emoji: '😂', image: 'https://daniellacnunez-collab.github.io/ohnozombies/funny.PNG', hint: 'Makes people laugh!' },
+        { type: 'word', display: 'Smart', answer: 'smart', synonyms: ['he is smart', 'she is smart', 'clever', 'intelligent'], emoji: '🧠', image: 'https://daniellacnunez-collab.github.io/ohnozombies/smart.JPG', hint: 'Starts with S - M - A' },
+        { type: 'word', display: 'Cute', answer: 'cute', synonyms: ['so cute', 'adorable'], emoji: '🥰', image: 'https://daniellacnunez-collab.github.io/ohnozombies/cute.JPG', hint: 'Starts with C - U - T' },
+        { type: 'word', display: 'Friendly', answer: 'friendly', synonyms: ['nice', 'welcoming'], emoji: '🤝', image: 'https://daniellacnunez-collab.github.io/ohnozombies/friendly.JPG', hint: 'Starts with F - R - I' },
+        { type: 'word', display: 'Kind', answer: 'kind', synonyms: ['helpful', 'caring'], emoji: '💛', image: 'https://daniellacnunez-collab.github.io/ohnozombies/kind.PNG', hint: 'Starts with K - I - N' },
+        { type: 'word', display: 'Loving', answer: 'loving', synonyms: ['affectionate', 'caring'], emoji: '❤️', image: 'https://daniellacnunez-collab.github.io/ohnozombies/loving.PNG', hint: 'Starts with L - O - V' },
+        { type: 'word', display: 'Strong', answer: 'strong', synonyms: ['powerful', 'muscular'], emoji: '💪', image: 'https://daniellacnunez-collab.github.io/ohnozombies/strong.PNG', hint: 'Starts with S - T - R' }
+      ]
+    };
+
+    let customQuestions = [];
+    try {
+      const savedQ = localStorage.getItem('pvz_custom_questions_v1');
+      if (savedQ) customQuestions = JSON.parse(savedQ);
+    } catch (e) {}
+
+    const state = {
+      sun: 125,
+      wordsMastered: 0,
+      streak: 0,
+      wave: 1,
+      maxWaves: 3,
+      waveProgress: 0,
+      zombiesSpawnedInWave: 0,
+      zombiesPerWave: 6,
+      spawnTimer: 3500,
+      skySunTimer: 8000,
+      selectedTool: 'peashooter',
+      category: 'traits',
+      difficulty: 'medium',
+      speedMultiplier: 1,
+      started: false,
+      paused: false,
+      gameOver: false,
+      victory: false,
+      muted: false,
+      currentCard: null,
+      cardIndex: 0,
+      grid: Array.from({ length: ROWS }, () => Array(COLS).fill(null)),
+      zombies: [],
+      projectiles: [],
+      suns: [],
+      particles: [],
+      lawnmowers: Array.from({ length: ROWS }, (_, r) => ({ row: r, active: true, triggered: false, x: 0 }))
+    };
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    const layout = {
+      width: 820,
+      height: 440,
+      houseWidth: 112,
+      padTop: 14,
+      padBottom: 14,
+      padRight: 16,
+      cellW: 76,
+      cellH: 82
+    };
+
+    function showToast(msg, isError = false) {
+      let el = document.getElementById('globalToastBanner');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'globalToastBanner';
+        document.body.appendChild(el);
+      }
+      el.className = `toast-banner ${isError ? 'error' : ''}`;
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(el._hideTimer);
+      el._hideTimer = setTimeout(() => {
+        el.style.display = 'none';
+      }, 3400);
+    }
+
+    function playTone(freq = 440, duration = 0.12, type = 'sine', gainVal = 0.12) {
+      if (state.muted) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!window._pvzAudioCtx) window._pvzAudioCtx = new AudioCtx();
+        const actx = window._pvzAudioCtx;
+        if (actx.state === 'suspended') actx.resume();
+        const osc = actx.createOscillator();
+        const gain = actx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(gainVal, actx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.start();
+        osc.stop(actx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function getJoinUrl(roomCode = '', forceJoinPage = true) {
+      let base = window.location.href.split('?')[0].split('#')[0];
+      if ((!base || base.startsWith('about:') || base.startsWith('blob:')) && window.parent && window.parent !== window) {
+        try {
+          base = window.parent.location.href.split('?')[0].split('#')[0];
+        } catch (e) {}
+      }
+      const params = new URLSearchParams();
+      if (forceJoinPage) params.set('page', 'join');
+      if (roomCode) params.set('room', roomCode);
+      const query = params.toString();
+      return `${base}${query ? '?' + query : ''}#join`;
+    }
+
+    function openStudentJoinPage(prefillCode = '') {
+      classroom.role = 'join_page';
+      applyRoleRestrictions();
+      const joinInp = document.getElementById('inputJoinRoomCode');
+      if (joinInp && prefillCode) joinInp.value = prefillCode.toUpperCase();
+      try {
+        window.history.replaceState(null, '', '#join');
+      } catch (e) {}
+    }
+
+    function stopIpadQrScanner() {
+      if (classroom.qrScanTimer) {
+        clearInterval(classroom.qrScanTimer);
+        classroom.qrScanTimer = null;
+      }
+      if (classroom.qrStream) {
+        classroom.qrStream.getTracks().forEach((t) => t.stop());
+        classroom.qrStream = null;
+      }
+      document.getElementById('ipadQrScannerBox')?.classList.add('hidden');
+    }
+
+    async function startIpadQrScanner() {
+      const box = document.getElementById('ipadQrScannerBox');
+      const video = document.getElementById('ipadQrVideo');
+      if (!box || !video) return;
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('📷 Camera not available here — type the 5-letter Room Code above!', true);
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+        classroom.qrStream = stream;
+        video.srcObject = stream;
+        await video.play();
+        box.classList.remove('hidden');
+
+        if ('BarcodeDetector' in window) {
+          const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+          classroom.qrScanTimer = setInterval(async () => {
+            if (!video || video.readyState < 2) return;
+            try {
+              const codes = await detector.detect(video);
+              if (codes && codes.length > 0 && codes[0].rawValue) {
+                const raw = codes[0].rawValue;
+                let extractedCode = '';
+                try {
+                  const u = new URL(raw);
+                  extractedCode = u.searchParams.get('room') || '';
+                } catch (e) {
+                  const m = raw.match(/[A-Z0-9]{4,8}/i);
+                  if (m) extractedCode = m[0];
+                }
+                if (extractedCode) {
+                  const inp = document.getElementById('inputJoinRoomCode');
+                  if (inp) inp.value = extractedCode.toUpperCase();
+                  stopIpadQrScanner();
+                  playTone(720, 0.14, 'triangle', 0.16);
+                  showToast(`✅ Scanned Room Code: ${extractedCode.toUpperCase()}!`);
+                }
+              }
+            } catch (e) {}
+          }, 350);
+        } else {
+          showToast('📱 Tip: You can also point the iPad Camera app at the QR code to open the link!', false);
+        }
+      } catch (err) {
+        showToast('📷 Camera permission denied — enter the 5-letter Room Code above!', true);
+      }
+    }
+
+    function closeStudentJoinPage() {
+      stopIpadQrScanner();
+      classroom.role = 'solo';
+      applyRoleRestrictions();
+      resizeCanvas();
+      try {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      } catch (e) {}
+    }
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      const parent = canvas.parentElement;
+      const rect = parent ? parent.getBoundingClientRect() : { width: 820, height: 440 };
+      const w = Math.max(320, Math.floor(rect.width || 820));
+      const h = Math.max(240, Math.floor(rect.height || 440));
+      canvas.width = w;
+      canvas.height = h;
+      layout.width = w;
+      layout.height = h;
+      layout.houseWidth = Math.max(76, Math.round(w * 0.135));
+      layout.padTop = 10;
+      layout.padBottom = 10;
+      layout.padRight = 12;
+      const lawnW = w - layout.houseWidth - layout.padRight;
+      const lawnH = h - layout.padTop - layout.padBottom;
+      layout.cellW = lawnW / COLS;
+      layout.cellH = lawnH / ROWS;
+      state.lawnmowers.forEach((m) => {
+        if (!m.triggered) m.x = layout.houseWidth - 10;
+      });
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    function getCellRect(row, col) {
+      return {
+        x: layout.houseWidth + col * layout.cellW,
+        y: layout.padTop + row * layout.cellH,
+        w: layout.cellW,
+        h: layout.cellH
+      };
+    }
+
+    function spawnParticles(x, y, color, count = 8) {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+        const speed = 35 + Math.random() * 85;
+        state.particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 20,
+          color,
+          life: 450 + Math.random() * 250,
+          maxLife: 700,
+          size: 3 + Math.random() * 4
+        });
+      }
+    }
+
+    function spawnZombie(forcedRow = null) {
+      const row = forcedRow !== null ? forcedRow : Math.floor(Math.random() * ROWS);
+      const roll = Math.random();
+      let type = 'regular';
+      let hp = 140;
+      let speed = 15;
+      if (state.wave >= 2 && roll > 0.62) {
+        type = 'cone';
+        hp = 240;
+        speed = 14;
+      }
+      if (state.wave >= 3 && roll > 0.84) {
+        type = 'bucket';
+        hp = 360;
+        speed = 13;
+      }
+      if (state.difficulty === 'easy') speed *= 0.8;
+      if (state.difficulty === 'hard') speed *= 1.25;
+
+      state.zombies.push({
+        row,
+        x: layout.width - 14,
+        type,
+        hp,
+        maxHp: hp,
+        speed,
+        chillTimer: 0,
+        eating: false,
+        walkPhase: Math.random() * Math.PI * 2
+      });
+    }
+
+    function updateSunUI() {
+      const sunEl = document.getElementById('sunCounter');
+      if (sunEl) sunEl.textContent = state.sun;
+      const mastEl = document.getElementById('wordsMasteredCount');
+      if (mastEl) mastEl.textContent = state.wordsMastered;
+      const streakEl = document.getElementById('streakCount');
+      if (streakEl) streakEl.textContent = state.streak;
+      const waveEl = document.getElementById('waveText');
+      if (waveEl) {
+        waveEl.textContent = state.maxWaves >= 999 ? `${state.wave} / ∞` : `${state.wave} / ${state.maxWaves}`;
+      }
+
+      document.querySelectorAll('.seed-card[data-plant]').forEach((btn) => {
+        const pType = btn.getAttribute('data-plant');
+        const cfg = PLANT_CONFIGS[pType];
+        if (!cfg) return;
+        btn.classList.toggle('disabled', state.sun < cfg.cost);
+        btn.classList.toggle('selected', state.selectedTool === pType);
+      });
+      const shovelBtn = document.getElementById('toolShovel');
+      if (shovelBtn) shovelBtn.classList.toggle('selected', state.selectedTool === 'shovel');
+    }
+
+    function syncGlobalThemeIcons() {
+      const brandEl = document.getElementById('headerBrandIcon');
+      if (brandEl) {
+        if (gameIcons.sunflower && gameIcons.sunflower.image) {
+          brandEl.innerHTML = `<img src="${gameIcons.sunflower.image}" alt="" style="width:26px;height:26px;object-fit:contain;border-radius:6px;display:inline-block;" />`;
+        } else {
+          brandEl.textContent = (gameIcons.sunflower && gameIcons.sunflower.emoji) || '🌻';
+        }
+      }
+      const sunIconEl = document.getElementById('sunBankIcon');
+      if (sunIconEl) {
+        if (gameIcons.sun && gameIcons.sun.image) {
+          sunIconEl.innerHTML = `<img src="${gameIcons.sun.image}" alt="" style="width:24px;height:24px;object-fit:contain;border-radius:6px;display:inline-block;" />`;
+        } else {
+          sunIconEl.textContent = (gameIcons.sun && gameIcons.sun.emoji) || '☀️';
+        }
+      }
+      Object.keys(PLANT_CONFIGS).forEach((pKey) => {
+        const el = document.querySelector(`.seed-card[data-plant="${pKey}"] .seed-emoji`);
+        if (el && gameIcons[pKey]) {
+          if (gameIcons[pKey].image) {
+            el.innerHTML = `<img src="${gameIcons[pKey].image}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:6px;display:inline-block;" />`;
+          } else {
+            el.textContent = gameIcons[pKey].emoji;
+          }
+        }
+      });
+    }
+
+    function drawFullHeightHouse() {
+      if (!ctx) return;
+      const hw = layout.houseWidth;
+      const h = layout.height;
+
+      // House facade spanning the full vertical lawn
+      const wallGrad = ctx.createLinearGradient(0, 0, hw, 0);
+      wallGrad.addColorStop(0, '#7c2d12');
+      wallGrad.addColorStop(1, '#b45309');
+      ctx.fillStyle = wallGrad;
+      ctx.fillRect(0, 0, hw - 8, h);
+
+      // Horizontal clapboard siding lines
+      ctx.strokeStyle = 'rgba(69, 26, 3, 0.35)';
+      ctx.lineWidth = 1.5;
+      for (let y = 16; y < h; y += 18) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(hw - 8, y);
+        ctx.stroke();
+      }
+
+      // Roof overhang trim along lawn edge
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(hw - 12, 0, 12, h);
+
+      // Determine how close zombies are to gauge family panic
+      let closestRatio = 1;
+      state.zombies.forEach((z) => {
+        const ratio = (z.x - hw) / Math.max(1, layout.width - hw);
+        if (ratio < closestRatio) closestRatio = ratio;
+      });
+      const panicLevel = closestRatio < 0.25 ? 2 : closestRatio < 0.55 ? 1 : 0;
+
+      // Windows with scared family members & front door on middle row
+      const familyEmojis = panicLevel === 2
+        ? ['😱', '😨', '🙀', '😱']
+        : panicLevel === 1
+          ? ['😟', '😰', '🐶', '😨']
+          : ['👀', '🙂', '🐶', '👀'];
+      let famIdx = 0;
+
+      for (let r = 0; r < ROWS; r++) {
+        const cy = layout.padTop + (r + 0.5) * layout.cellH;
+        const cx = (hw - 12) * 0.5;
+
+        if (r === 2) {
+          // Front Door
+          const dw = Math.min(44, hw * 0.48);
+          const dh = Math.min(64, layout.cellH * 0.78);
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(cx - dw / 2, cy - dh / 2, dw, dh);
+          ctx.strokeStyle = '#fde047';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(cx - dw / 2, cy - dh / 2, dw, dh);
+          const houseIcon = (gameIcons.house || DEFAULT_GAME_ICONS.house).emoji;
+          ctx.font = `${Math.round(dw * 0.55)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(houseIcon, cx, cy);
+        } else {
+          // Glowing Window with Family Member
+          const ww = Math.min(46, hw * 0.5);
+          const wh = Math.min(48, layout.cellH * 0.6);
+          ctx.fillStyle = panicLevel === 2 ? '#fecaca' : '#fef08a';
+          ctx.fillRect(cx - ww / 2, cy - wh / 2, ww, wh);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(cx - ww / 2, cy - wh / 2, ww, wh);
+
+          const face = familyEmojis[famIdx % familyEmojis.length];
+          famIdx++;
+          ctx.font = `${Math.round(Math.min(ww, wh) * 0.66)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(face, cx, cy + 1);
+        }
+      }
+    }
+
+    function getActiveDeck() {
+      if (state.category === 'custom') {
+        if (customQuestions.length > 0) return customQuestions;
+        return BUILTIN_DECKS.traits;
+      }
+      if (state.category === 'mix') {
+        const all = [
+          ...BUILTIN_DECKS.traits,
+          ...customQuestions
+        ];
+        return all.length > 0 ? all : BUILTIN_DECKS.traits;
+      }
+      return BUILTIN_DECKS.traits;
+    }
+
+    function loadNextCard(advance = true) {
+      const deck = getActiveDeck();
+      if (!deck || deck.length === 0) return;
+
+      if (advance) {
+        state.cardIndex = (state.cardIndex + 1) % deck.length;
+      } else if (state.cardIndex >= deck.length || state.cardIndex < 0) {
+        state.cardIndex = 0;
+      }
+
+      const card = deck[state.cardIndex];
+      state.currentCard = card;
+
+      const typeBadge = document.getElementById('cardPromptType');
+      const rewardBadge = document.getElementById('cardRewardBadge');
+      const emojiEl = document.getElementById('cardVisualEmoji');
+      const imgEl = document.getElementById('cardVisualImage');
+      const promptEl = document.getElementById('cardPromptText');
+      const hintEl = document.getElementById('cardHintText');
+      const feedbackEl = document.getElementById('speechFeedbackBanner');
+
+      if (typeBadge) {
+        typeBadge.textContent = card.type === 'qa' ? '❓ Answer the Question' : '🗣️ Say the Word';
+      }
+      if (rewardBadge) {
+        rewardBadge.textContent = `+${card.sunReward || 50} ☀️`;
+      }
+      if (card.image) {
+        if (emojiEl) {
+          emojiEl.textContent = card.emoji || '🌟';
+          emojiEl.classList.add('hidden');
+        }
+        if (imgEl) {
+          imgEl.onerror = () => {
+            imgEl.classList.add('hidden');
+            if (emojiEl) emojiEl.classList.remove('hidden');
+          };
+          imgEl.src = card.image;
+          imgEl.classList.remove('hidden');
+        }
+      } else {
+        if (imgEl) {
+          imgEl.src = '';
+          imgEl.classList.add('hidden');
+        }
+        if (emojiEl) {
+          emojiEl.textContent = card.emoji || '🌟';
+          emojiEl.classList.remove('hidden');
+        }
+      }
+      if (promptEl) promptEl.textContent = card.display || '';
+      if (hintEl) {
+        const autoHint = card.answer ? `Starts with ${card.answer.slice(0, 3).toUpperCase().split('').join(' - ')}` : '';
+        hintEl.textContent = `💡 Hint: ${card.hint || autoHint}`;
+      }
+      if (feedbackEl && !advance) {
+        feedbackEl.style.background = '#f1f5f9';
+        feedbackEl.style.color = '#334155';
+        feedbackEl.textContent = '🎤 Click "Speak Answer" or type below to earn Suns!';
+      }
+    }
+
+    function applyTeacherDeckPayload(roomData) {
+      if (!roomData || typeof roomData !== 'object') return;
+      let changed = false;
+
+      if (typeof roomData.iconsJson === 'string' && roomData.iconsJson.length > 2) {
+        try {
+          const parsedIcons = JSON.parse(roomData.iconsJson);
+          if (parsedIcons && typeof parsedIcons === 'object') {
+            gameIcons = { ...DEFAULT_GAME_ICONS, ...parsedIcons };
+            syncGlobalThemeIcons();
+            changed = true;
+          }
+        } catch (e) {}
+      }
+
+      if (typeof roomData.questionsJson === 'string') {
+        try {
+          const parsedQuestions = JSON.parse(roomData.questionsJson);
+          if (Array.isArray(parsedQuestions)) {
+            customQuestions = parsedQuestions;
+            changed = true;
+          }
+        } catch (e) {}
+      }
+
+      if (typeof roomData.category === 'string' && roomData.category) {
+        const nextCat = (roomData.category === 'custom' && customQuestions.length === 0) ? 'traits' : roomData.category;
+        if (state.category !== nextCat) {
+          state.category = nextCat;
+          state.cardIndex = 0;
+          changed = true;
+        }
+        const topicSel = document.getElementById('topicSelect');
+        if (topicSel) topicSel.value = nextCat;
+      }
+
+      if (changed) {
+        loadNextCard(false);
+      }
+    }
+
+    function buildTeacherRoomDeckFields() {
+      const effectiveCategory = (state.category === 'custom' && customQuestions.length === 0) ? 'traits' : state.category;
+      let questionsJson = JSON.stringify(customQuestions);
+      // Guard against oversized pasted images exceeding Firestore 1MB document limit
+      if (questionsJson.length > 750000) {
+        questionsJson = JSON.stringify(customQuestions.map((q) => ({ ...q, image: null })));
+      }
+      let iconsJson = JSON.stringify(gameIcons);
+      if (iconsJson.length > 200000) {
+        const stripped = {};
+        Object.keys(gameIcons).forEach((k) => {
+          stripped[k] = { ...gameIcons[k], image: null };
+        });
+        iconsJson = JSON.stringify(stripped);
+      }
+      return {
+        category: effectiveCategory,
+        questionsJson,
+        iconsJson
+      };
+    }
+
+    function syncTeacherDeckToClass() {
+      // Always publish to global shared deck so anyone opening the app sees updated questions & icons
+      publishGlobalSharedDeck();
+
+      if (classroom.role !== 'teacher' || !classroom.roomCode) return;
+      const deckFields = buildTeacherRoomDeckFields();
+      if (classroom.broadcastChannel) {
+        classroom.broadcastChannel.postMessage({
+          type: 'room_status',
+          status: classroom.sessionStatus,
+          maxWaves: classroom.maxWaves,
+          ...deckFields
+        });
+      }
+      if (db && firebaseUser) {
+        const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', classroom.roomCode);
+        setDoc(roomRef, {
+          roomCode: classroom.roomCode,
+          status: classroom.sessionStatus,
+          maxWaves: classroom.maxWaves,
+          ...deckFields,
+          updatedAt: Date.now()
+        }, { merge: true }).catch((e) => console.warn('Sync teacher deck error:', e));
+      }
+    }
+
+    function normalizePhrase(str) {
+      return String(str || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\b(a|an|the|it is|its|that is|thats|this is|they are|my|i see|i think)\b/g, '')
+        .replace(/ph/g, 'f')
+        .replace(/ck/g, 'k')
+        .replace(/qu/g, 'kw')
+        .replace(/([a-z])\1+/g, '$1')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function levenshteinDistance(a, b) {
+      const m = a.length;
+      const n = b.length;
+      const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          dp[i][j] = Math.min(
+            dp[i - 1][j] + 1,
+            dp[i][j - 1] + 1,
+            dp[i - 1][j - 1] + cost
+          );
+        }
+      }
+      return dp[m][n];
+    }
+
+    function isFuzzyMatch(spoken, target) {
+      if (!spoken || !target) return false;
+      if (spoken === target || spoken.includes(target) || target.includes(spoken)) return true;
+
+      // Also compare individual words so extra filler speech still matches
+      const spokenWords = spoken.split(' ');
+      const targetWords = target.split(' ');
+      for (const sw of spokenWords) {
+        if (sw.length < 2) continue;
+        for (const tw of targetWords) {
+          if (sw === tw || sw.includes(tw) || tw.includes(sw)) return true;
+          const dist = levenshteinDistance(sw, tw);
+          const maxAllowed = Math.max(1, Math.ceil(Math.max(sw.length, tw.length) * 0.38));
+          if (dist <= maxAllowed) return true;
+        }
+      }
+
+      const fullDist = levenshteinDistance(spoken, target);
+      const maxFullAllowed = Math.max(1, Math.ceil(Math.max(spoken.length, target.length) * 0.38));
+      return fullDist <= maxFullAllowed;
+    }
+
+    function handleAnswerSubmission(rawInput) {
+      if (!state.currentCard) return false;
+      const cleaned = normalizePhrase(rawInput);
+      const feedbackEl = document.getElementById('speechFeedbackBanner');
+      if (!cleaned) return false;
+
+      const candidates = [state.currentCard.answer, ...(state.currentCard.synonyms || [])]
+        .map(normalizePhrase)
+        .filter(Boolean);
+
+      const matched = candidates.some((cand) => isFuzzyMatch(cleaned, cand));
+      if (matched) {
+        const reward = state.currentCard.sunReward || 50;
+        state.sun += reward;
+        state.wordsMastered += 1;
+        state.streak += 1;
+        playTone(587, 0.1, 'triangle', 0.15);
+        setTimeout(() => playTone(880, 0.16, 'triangle', 0.15), 90);
+        spawnParticles(layout.width * 0.5, layout.height * 0.35, '#facc15', 14);
+        if (feedbackEl) {
+          feedbackEl.style.background = '#dcfce7';
+          feedbackEl.style.color = '#166534';
+          feedbackEl.textContent = `🎉 Awesome! "${rawInput}" earned +${reward} Suns ☀️!`;
+        }
+        updateSunUI();
+        loadNextCard(true);
+        return true;
+      } else {
+        state.streak = 0;
+        playTone(210, 0.14, 'sawtooth', 0.09);
+        if (feedbackEl) {
+          feedbackEl.style.background = '#fee2e2';
+          feedbackEl.style.color = '#991b1b';
+          feedbackEl.textContent = `🔄 Heard "${rawInput}" — try again or click Hear Word!`;
+        }
+        updateSunUI();
+        return false;
+      }
+    }
+
+    function resetGame() {
+      resizeCanvas();
+      state.sun = 125;
+      state.wordsMastered = 0;
+      state.streak = 0;
+      state.wave = 1;
+      state.waveProgress = 0;
+      state.zombiesSpawnedInWave = 0;
+      state.zombiesPerWave = 5;
+      state.spawnTimer = 3200;
+      state.skySunTimer = 12000;
+      state.started = true;
+      state.paused = false;
+      state.gameOver = false;
+      state.victory = false;
+      state.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+      state.zombies = [];
+      state.projectiles = [];
+      state.suns = [];
+      state.particles = [];
+      state.lawnmowers = Array.from({ length: ROWS }, (_, r) => ({
+        row: r,
+        active: true,
+        triggered: false,
+        x: layout.houseWidth - 10
+      }));
+
+      document.getElementById('startOverlay')?.classList.add('hidden');
+      document.getElementById('pauseOverlay')?.classList.add('hidden');
+      document.getElementById('endGameModal')?.classList.add('hidden');
+      updateSunUI();
+      loadNextCard(false);
+    }
+
+    function triggerEndGame(won) {
+      state.gameOver = true;
+      state.victory = won;
+      const modal = document.getElementById('endGameModal');
+      const titleEl = document.getElementById('endGameTitle');
+      const msgEl = document.getElementById('endGameMessage');
+      const statsEl = document.getElementById('endGameStats');
+
+      if (titleEl) titleEl.textContent = won ? '🏆 House Protected!' : '🧟 Oh No! Zombies Reached the House!';
+      if (msgEl) {
+        msgEl.textContent = won
+          ? 'Amazing pronunciation skills! You defended the family house through every wave!'
+          : 'Great effort! Practice speaking the words clearly to earn more Suns and plant stronger defenses.';
+      }
+      if (statsEl) {
+        statsEl.textContent = `🗣️ Words Mastered: ${state.wordsMastered}  •  🌊 Wave Reached: ${state.wave}`;
+      }
+      modal?.classList.remove('hidden');
+      playTone(won ? 660 : 180, 0.3, won ? 'triangle' : 'sawtooth', 0.16);
+    }
+
+    function updateSimulation(dt) {
+      if (!state.started || state.paused || state.gameOver) return;
+      const stepMs = dt * state.speedMultiplier;
+
+      // Periodic sky sun drop (every 30 seconds)
+      state.skySunTimer -= stepMs;
+      if (state.skySunTimer <= 0) {
+        state.skySunTimer = 30000;
+        const sx = layout.houseWidth + 40 + Math.random() * Math.max(60, layout.width - layout.houseWidth - 80);
+        const targetY = layout.padTop + 40 + Math.random() * Math.max(60, layout.height - 80);
+        state.suns.push({ x: sx, y: 12, targetY, value: 25 });
+      }
+
+      // Animate falling suns (persistent on lawn until clicked)
+      state.suns.forEach((s) => {
+        if (s.y < s.targetY) {
+          s.y = Math.min(s.targetY, s.y + 0.045 * stepMs);
+        }
+      });
+
+      // Wave zombie spawner
+      if (state.zombiesSpawnedInWave < state.zombiesPerWave) {
+        state.spawnTimer -= stepMs;
+        if (state.spawnTimer <= 0) {
+          spawnZombie();
+          state.zombiesSpawnedInWave += 1;
+          const baseDelay = state.difficulty === 'easy' ? 6800 : state.difficulty === 'hard' ? 4200 : 5400;
+          state.spawnTimer = Math.max(2200, baseDelay - state.wave * 320);
+        }
+      } else if (state.zombies.length === 0) {
+        if (state.maxWaves < 999 && state.wave >= state.maxWaves) {
+          triggerEndGame(true);
+          return;
+        }
+        state.wave += 1;
+        state.zombiesSpawnedInWave = 0;
+        state.zombiesPerWave = 5 + state.wave * 2;
+        state.spawnTimer = 2500;
+        updateSunUI();
+        showToast(`🌊 Wave ${state.wave} incoming!`);
+      }
+
+      // Update plants
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const plant = state.grid[r][c];
+          if (!plant) continue;
+          const cell = getCellRect(r, c);
+          const cx = cell.x + cell.w * 0.5;
+          const cy = cell.y + cell.h * 0.5;
+
+          if (plant.type === 'sunflower') {
+            plant.timer -= stepMs;
+            if (plant.timer <= 0) {
+              plant.timer = 11000;
+              state.suns.push({
+                x: cx + (Math.random() * 18 - 9),
+                y: cy - 12,
+                targetY: cy + 12,
+                value: 25
+              });
+            }
+          } else if (plant.type === 'peashooter' || plant.type === 'snowpea') {
+            const hasTarget = state.zombies.some((z) => z.row === r && z.x > cx);
+            if (hasTarget) {
+              plant.timer -= stepMs;
+              if (plant.timer <= 0) {
+                plant.timer = PLANT_CONFIGS[plant.type].cooldown;
+                state.projectiles.push({
+                  row: r,
+                  x: cx + 16,
+                  y: cy - 4,
+                  speed: 260,
+                  damage: 28,
+                  frozen: plant.type === 'snowpea'
+                });
+                playTone(520, 0.05, 'sine', 0.06);
+              }
+            }
+          } else if (plant.type === 'cherrybomb') {
+            plant.timer -= stepMs;
+            if (plant.timer <= 0) {
+              spawnParticles(cx, cy, '#ef4444', 22);
+              playTone(130, 0.28, 'sawtooth', 0.18);
+              for (let zi = state.zombies.length - 1; zi >= 0; zi--) {
+                const z = state.zombies[zi];
+                const zy = layout.padTop + (z.row + 0.5) * layout.cellH;
+                if (Math.hypot(z.x - cx, zy - cy) <= layout.cellW * 1.85) {
+                  state.zombies.splice(zi, 1);
+                }
+              }
+              state.grid[r][c] = null;
+            }
+          }
+        }
+      }
+
+      // Update projectiles
+      for (let i = state.projectiles.length - 1; i >= 0; i--) {
+        const pr = state.projectiles[i];
+        pr.x += (pr.speed * stepMs) / 1000;
+        if (pr.x > layout.width + 20) {
+          state.projectiles.splice(i, 1);
+          continue;
+        }
+        let hit = false;
+        for (let zi = state.zombies.length - 1; zi >= 0; zi--) {
+          const z = state.zombies[zi];
+          if (z.row === pr.row && Math.abs(z.x - pr.x) < 22) {
+            z.hp -= pr.damage;
+            if (pr.frozen) z.chillTimer = 3500;
+            spawnParticles(pr.x, pr.y, pr.frozen ? '#38bdf8' : '#84cc16', 5);
+            if (z.hp <= 0) {
+              state.zombies.splice(zi, 1);
+            }
+            hit = true;
+            break;
+          }
+        }
+        if (hit) state.projectiles.splice(i, 1);
+      }
+
+      // Update lawnmowers
+      state.lawnmowers.forEach((m) => {
+        if (!m.active || !m.triggered) return;
+        m.x += (340 * stepMs) / 1000;
+        for (let zi = state.zombies.length - 1; zi >= 0; zi--) {
+          if (state.zombies[zi].row === m.row && Math.abs(state.zombies[zi].x - m.x) < 34) {
+            spawnParticles(state.zombies[zi].x, layout.padTop + (m.row + 0.5) * layout.cellH, '#f97316', 10);
+            state.zombies.splice(zi, 1);
+          }
+        }
+        if (m.x > layout.width + 30) {
+          m.active = false;
+        }
+      });
+
+      // Update zombies
+      for (let zi = state.zombies.length - 1; zi >= 0; zi--) {
+        const z = state.zombies[zi];
+        if (z.chillTimer > 0) z.chillTimer -= stepMs;
+        const speedMod = z.chillTimer > 0 ? 0.5 : 1;
+
+        const col = Math.floor((z.x - layout.houseWidth) / layout.cellW);
+        const blocker = col >= 0 && col < COLS ? state.grid[z.row][col] : null;
+        if (blocker) {
+          z.eating = true;
+          blocker.hp -= (32 * stepMs) / 1000;
+          if (blocker.hp <= 0) {
+            state.grid[z.row][col] = null;
+          }
+        } else {
+          z.eating = false;
+          z.x -= (z.speed * speedMod * stepMs) / 1000;
+          z.walkPhase += (0.008 * speedMod * stepMs);
+        }
+
+        // Check lawnmower or house breach
+        if (z.x <= layout.houseWidth + 4) {
+          const mower = state.lawnmowers[z.row];
+          if (mower && mower.active && !mower.triggered) {
+            mower.triggered = true;
+            playTone(190, 0.25, 'sawtooth', 0.16);
+          } else if (z.x <= layout.houseWidth - 14) {
+            triggerEndGame(false);
+            return;
+          }
+        }
+      }
+
+      // Update particles
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const pt = state.particles[i];
+        pt.life -= stepMs;
+        pt.x += (pt.vx * stepMs) / 1000;
+        pt.y += (pt.vy * stepMs) / 1000;
+        if (pt.life <= 0) state.particles.splice(i, 1);
+      }
+    }
+
+    function drawWalkingZombie(z) {
+      const zy = layout.padTop + (z.row + 0.54) * layout.cellH;
+      const bounce = z.eating ? 0 : Math.abs(Math.sin(z.walkPhase)) * 3.5;
+      const lean = z.eating ? -0.18 : Math.sin(z.walkPhase * 0.5) * 0.06 - 0.05;
+      const size = Math.min(layout.cellW, layout.cellH) * 0.66;
+
+      ctx.save();
+      ctx.translate(z.x, zy - bounce);
+      ctx.rotate(lean);
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.24)';
+      ctx.beginPath();
+      ctx.ellipse(0, size * 0.48 + bounce, size * 0.34, size * 0.12, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Animated walking legs
+      const stride = z.eating ? 0 : Math.sin(z.walkPhase) * 6;
+      ctx.strokeStyle = z.chillTimer > 0 ? '#0284c7' : '#334155';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(-4, size * 0.22);
+      ctx.lineTo(-4 - stride, size * 0.46);
+      ctx.moveTo(4, size * 0.22);
+      ctx.lineTo(4 + stride, size * 0.46);
+      ctx.stroke();
+
+      const zKey = z.type === 'bucket' ? 'zombie_bucket' : z.type === 'cone' ? 'zombie_cone' : 'zombie_regular';
+      const zCfg = gameIcons[zKey] || DEFAULT_GAME_ICONS[zKey];
+
+      if (zCfg.image) {
+        const img = getCachedSpriteImage(zCfg.image);
+        if (img && img.complete && img.naturalWidth > 0) {
+          ctx.drawImage(img, -size / 2, -size / 2, size, size);
+        } else {
+          ctx.font = `${Math.round(size)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(zCfg.emoji, 0, 0);
+        }
+      } else {
+        ctx.font = `${Math.round(size)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(zCfg.emoji, 0, 0);
+      }
+
+      if (z.chillTimer > 0) {
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.32)';
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 0.44, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // Health bar
+      const bw = Math.max(24, layout.cellW * 0.52);
+      ctx.fillStyle = 'rgba(15,23,42,0.65)';
+      ctx.fillRect(z.x - bw / 2, zy - size * 0.62, bw, 4);
+      ctx.fillStyle = z.chillTimer > 0 ? '#38bdf8' : '#ef4444';
+      ctx.fillRect(z.x - bw / 2, zy - size * 0.62, bw * Math.max(0, z.hp / z.maxHp), 4);
+    }
+
+    function drawGame() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, layout.width, layout.height);
+
+      drawFullHeightHouse();
+
+      // 5x9 Lawn Grid
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const rect = getCellRect(r, c);
+          ctx.fillStyle = (r + c) % 2 === 0 ? '#4ade80' : '#22c55e';
+          ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+          ctx.strokeStyle = 'rgba(20, 83, 45, 0.16)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+
+          const plant = state.grid[r][c];
+          if (plant) {
+            const pCfg = gameIcons[plant.type] || DEFAULT_GAME_ICONS[plant.type];
+            const sz = Math.min(rect.w, rect.h) * 0.68;
+            const cx = rect.x + rect.w * 0.5;
+            const cy = rect.y + rect.h * 0.5;
+            if (pCfg && pCfg.image) {
+              const img = getCachedSpriteImage(pCfg.image);
+              if (img && img.complete && img.naturalWidth > 0) {
+                ctx.drawImage(img, cx - sz / 2, cy - sz / 2, sz, sz);
+              } else {
+                ctx.font = `${Math.round(sz)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(pCfg.emoji, cx, cy);
+              }
+            } else if (pCfg) {
+              ctx.font = `${Math.round(sz)}px sans-serif`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(pCfg.emoji, cx, cy);
+            }
+          }
+        }
+      }
+
+      // Lawnmowers
+      const mowerCfg = gameIcons.lawnmower || DEFAULT_GAME_ICONS.lawnmower;
+      state.lawnmowers.forEach((m) => {
+        if (!m.active) return;
+        const my = layout.padTop + (m.row + 0.5) * layout.cellH;
+        ctx.font = `${Math.round(layout.cellH * 0.5)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(mowerCfg.emoji, m.x, my);
+      });
+
+      // Projectiles
+      state.projectiles.forEach((pr) => {
+        ctx.fillStyle = pr.frozen ? '#38bdf8' : '#84cc16';
+        ctx.beginPath();
+        ctx.arc(pr.x, pr.y, Math.max(5, layout.cellH * 0.11), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      // Walking Zombies
+      state.zombies.forEach(drawWalkingZombie);
+
+      // Collectible Sun Tokens
+      const sunCfg = gameIcons.sun || DEFAULT_GAME_ICONS.sun;
+      const sunSz = Math.round(layout.cellH * 0.56);
+      state.suns.forEach((s) => {
+        if (sunCfg.image) {
+          const img = getCachedSpriteImage(sunCfg.image);
+          if (img && img.complete && img.naturalWidth > 0) {
+            ctx.drawImage(img, s.x - sunSz / 2, s.y - sunSz / 2, sunSz, sunSz);
+            return;
+          }
+        }
+        ctx.font = `${sunSz}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(sunCfg.emoji, s.x, s.y);
+      });
+
+      // Particles
+      state.particles.forEach((pt) => {
+        ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+
+      // Attract-mode preview zombies shambling on the lawn before the game starts
+      if (!state.started) {
+        drawAttractModeZombies();
+      }
+    }
+
+    function drawAttractModeZombies() {
+      const now = performance.now();
+      const t = now * 0.001;
+
+      const previewZombies = [
+        { row: 1, speed: 24, offset: 0.15, emoji: (gameIcons.zombie_cone || DEFAULT_GAME_ICONS.zombie_cone).emoji },
+        { row: 2, speed: 20, offset: 0.42, emoji: (gameIcons.zombie_regular || DEFAULT_GAME_ICONS.zombie_regular).emoji },
+        { row: 3, speed: 18, offset: 0.68, emoji: (gameIcons.zombie_bucket || DEFAULT_GAME_ICONS.zombie_bucket).emoji },
+        { row: 4, speed: 26, offset: 0.88, emoji: (gameIcons.zombie_regular || DEFAULT_GAME_ICONS.zombie_regular).emoji }
+      ];
+
+      const lawnSpan = Math.max(120, layout.width - layout.houseWidth - 40);
+      previewZombies.forEach((pz, idx) => {
+        const progress = ((t * pz.speed) / lawnSpan + pz.offset) % 1;
+        const zx = layout.width - 20 - progress * lawnSpan;
+        const zy = layout.padTop + (pz.row + 0.55) * layout.cellH;
+        const bob = Math.abs(Math.sin(t * 6 + idx)) * 3.5;
+        const sz = Math.min(layout.cellW, layout.cellH) * 0.68;
+
+        ctx.save();
+        ctx.translate(zx, zy - bob);
+        ctx.rotate(Math.sin(t * 3 + idx) * 0.08 - 0.06);
+        ctx.font = `${Math.round(sz)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pz.emoji, 0, 0);
+        ctx.restore();
+      });
+    }
+
+    /*************************************************************************
+     * 2. CANVAS CLICK / TAP PLANTING & SUN COLLECTION
+     *************************************************************************/
+    function handleCanvasTap(clientX, clientY) {
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (clientX - rect.left) * scaleX;
+      const y = (clientY - rect.top) * scaleY;
+
+      // 1. Check if tapping a floating/dropped Sun token
+      for (let i = state.suns.length - 1; i >= 0; i--) {
+        const s = state.suns[i];
+        if (Math.hypot(x - s.x, y - s.y) <= Math.max(26, layout.cellH * 0.38)) {
+          state.sun += s.value;
+          state.suns.splice(i, 1);
+          playTone(780, 0.1, 'sine', 0.14);
+          spawnParticles(s.x, s.y, '#facc15', 8);
+          updateSunUI();
+          return;
+        }
+      }
+
+      if (!state.started || state.paused || state.gameOver) return;
+
+      // 2. Check grid planting / shoveling
+      const col = Math.floor((x - layout.houseWidth) / layout.cellW);
+      const row = Math.floor((y - layout.padTop) / layout.cellH);
+      if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return;
+
+      if (state.selectedTool === 'shovel') {
+        if (state.grid[row][col]) {
+          state.grid[row][col] = null;
+          playTone(260, 0.1, 'triangle', 0.12);
+          updateSunUI();
+        }
+        return;
+      }
+
+      const cfg = PLANT_CONFIGS[state.selectedTool];
+      if (!cfg) return;
+      if (state.grid[row][col]) {
+        showToast('🌱 That lawn square already has a plant!', true);
+        return;
+      }
+      if (state.sun < cfg.cost) {
+        showToast(`☀️ Need ${cfg.cost} Suns! Say a word to earn more.`, true);
+        playTone(200, 0.12, 'sawtooth', 0.08);
+        return;
+      }
+
+      state.sun -= cfg.cost;
+      state.grid[row][col] = {
+        type: state.selectedTool,
+        hp: cfg.hp,
+        timer: state.selectedTool === 'sunflower' ? 4000 : cfg.cooldown
+      };
+      playTone(440, 0.11, 'triangle', 0.14);
+      const cell = getCellRect(row, col);
+      spawnParticles(cell.x + cell.w * 0.5, cell.y + cell.h * 0.5, '#4ade80', 10);
+      updateSunUI();
+    }
+
+    if (canvas) {
+      canvas.addEventListener('click', (e) => handleCanvasTap(e.clientX, e.clientY));
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches[0]) {
+          e.preventDefault();
+          handleCanvasTap(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: false });
+    }
+
+    /*************************************************************************
+     * 3. SPEECH RECOGNITION & TEXT-TO-SPEECH CONTROLS
+     *************************************************************************/
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isListening = false;
+
+    function setupSpeechRecognition() {
+      if (!SpeechRecognitionAPI) return;
+      recognition = new SpeechRecognitionAPI();
+      recognition.lang = 'en-US';
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 5;
+
+      recognition.onstart = () => {
+        isListening = true;
+        const micBtn = document.getElementById('btnSpeakMic');
+        if (micBtn) micBtn.innerHTML = '<span>🔴</span><span>Listening...</span>';
+      };
+
+      recognition.onresult = (event) => {
+        const lastIdx = event.results.length - 1;
+        const result = event.results[lastIdx];
+        let handled = false;
+        for (let i = 0; i < result.length; i++) {
+          const transcript = result[i].transcript;
+          if (handleAnswerSubmission(transcript)) {
+            handled = true;
+            try { recognition.stop(); } catch (e) {}
+            break;
+          }
+        }
+        if (!handled && result.isFinal && result[0]) {
+          handleAnswerSubmission(result[0].transcript);
+        }
+      };
+
+      recognition.onerror = () => {
+        isListening = false;
+        const micBtn = document.getElementById('btnSpeakMic');
+        if (micBtn) micBtn.innerHTML = '<span>🎤</span><span>Speak Answer</span>';
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        const micBtn = document.getElementById('btnSpeakMic');
+        if (micBtn) micBtn.innerHTML = '<span>🎤</span><span>Speak Answer</span>';
+      };
+    }
+
+    function speakPromptOutLoud() {
+      if (!state.currentCard || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(state.currentCard.display);
+      utter.rate = 0.92;
+      window.speechSynthesis.speak(utter);
+    }
+
+    /*************************************************************************
+     * 4. CLASSROOM LIVE MULTIPLAYER & MINI-LAWN RENDERER
+     *************************************************************************/
+    function applyRoleRestrictions() {
+      const roleBadge = document.getElementById('roleBadge');
+      const teacherMarkBtn = document.getElementById('btnTeacherApprove');
+      const teacherDash = document.getElementById('teacherDashboardSection');
+      const joinPage = document.getElementById('studentJoinPage');
+      const mainGameShell = document.getElementById('mainGameArena');
+
+      // Teacher-only customization & session controls
+      const teacherOnlyIds = [
+        'btnClassroomHost',
+        'btnStudentJoinModal',
+        'btnPackManager',
+        'btnCustomizeIcons',
+        'btnCustomStudio',
+        'btnPause'
+      ];
+
+      if (classroom.role === 'join_page') {
+        if (roleBadge) {
+          roleBadge.textContent = '🎓 Join Class Page';
+          roleBadge.style.background = '#2563eb';
+        }
+        teacherOnlyIds.forEach((id) => document.getElementById(id)?.classList.add('hidden'));
+        if (teacherDash) teacherDash.classList.add('hidden');
+        if (mainGameShell) mainGameShell.classList.add('hidden');
+        if (joinPage) joinPage.classList.remove('hidden');
+      } else if (classroom.role === 'student') {
+        if (roleBadge) {
+          roleBadge.textContent = `🎓 Student (${classroom.roomCode})`;
+          roleBadge.style.background = '#2563eb';
+        }
+        teacherOnlyIds.forEach((id) => document.getElementById(id)?.classList.add('hidden'));
+        if (teacherMarkBtn) teacherMarkBtn.classList.add('hidden');
+        if (teacherDash) teacherDash.classList.add('hidden');
+        if (joinPage) joinPage.classList.add('hidden');
+        if (mainGameShell) mainGameShell.classList.remove('hidden');
+      } else if (classroom.role === 'teacher') {
+        if (roleBadge) {
+          roleBadge.textContent = `🏫 Teacher Host (${classroom.roomCode})`;
+          roleBadge.style.background = '#059669';
+        }
+        teacherOnlyIds.forEach((id) => document.getElementById(id)?.classList.remove('hidden'));
+        document.getElementById('btnStudentJoinModal')?.classList.add('hidden');
+        if (teacherDash) teacherDash.classList.remove('hidden');
+        if (joinPage) joinPage.classList.add('hidden');
+        if (mainGameShell) mainGameShell.classList.add('hidden');
+      } else {
+        if (roleBadge) {
+          roleBadge.textContent = 'Solo Mode';
+          roleBadge.style.background = '#059669';
+        }
+        teacherOnlyIds.forEach((id) => document.getElementById(id)?.classList.remove('hidden'));
+        if (teacherMarkBtn) teacherMarkBtn.classList.remove('hidden');
+        if (teacherDash) teacherDash.classList.add('hidden');
+        if (joinPage) joinPage.classList.add('hidden');
+        if (mainGameShell) mainGameShell.classList.remove('hidden');
+      }
+    }
+
+    function buildStudentSnapshot() {
+      const compactPlants = [];
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (state.grid[r][c]) compactPlants.push({ r, c, t: state.grid[r][c].type });
+        }
+      }
+      const compactZombies = state.zombies.map((z) => ({
+        r: z.row,
+        xr: Number(((z.x - layout.houseWidth) / Math.max(1, layout.width - layout.houseWidth)).toFixed(3)),
+        t: z.type
+      }));
+      return {
+        studentId: classroom.studentId,
+        roomCode: classroom.roomCode,
+        name: classroom.studentName,
+        sun: state.sun,
+        wordsMastered: state.wordsMastered,
+        wave: state.wave,
+        gameOver: state.gameOver,
+        victory: state.victory,
+        currentWord: state.currentCard ? state.currentCard.display : '—',
+        plantsJson: JSON.stringify(compactPlants),
+        zombiesJson: JSON.stringify(compactZombies),
+        plants: compactPlants,
+        zombies: compactZombies,
+        updatedAt: Date.now()
+      };
+    }
+
+    function normalizeStudentRecord(raw) {
+      if (!raw) return null;
+      let plants = Array.isArray(raw.plants) ? raw.plants : [];
+      let zombies = Array.isArray(raw.zombies) ? raw.zombies : [];
+      if ((!plants || plants.length === 0) && typeof raw.plantsJson === 'string') {
+        try { plants = JSON.parse(raw.plantsJson); } catch (e) {}
+      }
+      if ((!zombies || zombies.length === 0) && typeof raw.zombiesJson === 'string') {
+        try { zombies = JSON.parse(raw.zombiesJson); } catch (e) {}
+      }
+      return {
+        ...raw,
+        plants,
+        zombies
+      };
+    }
+
+    function drawMiniLawnSnapshot(targetCanvas, snap) {
+      if (!targetCanvas || !snap) return;
+      const mctx = targetCanvas.getContext('2d');
+      const w = targetCanvas.width;
+      const h = targetCanvas.height;
+      mctx.clearRect(0, 0, w, h);
+
+      const hw = Math.round(w * 0.12);
+      mctx.fillStyle = '#9a3412';
+      mctx.fillRect(0, 0, hw, h);
+
+      const cw = (w - hw) / COLS;
+      const ch = h / ROWS;
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          mctx.fillStyle = (r + c) % 2 === 0 ? '#4ade80' : '#22c55e';
+          mctx.fillRect(hw + c * cw, r * ch, cw, ch);
+        }
+      }
+
+      mctx.textAlign = 'center';
+      mctx.textBaseline = 'middle';
+      mctx.font = `${Math.max(12, Math.round(ch * 0.68))}px sans-serif`;
+
+      (snap.plants || []).forEach((p) => {
+        const icon = (gameIcons[p.t] || DEFAULT_GAME_ICONS[p.t] || { emoji: '🌱' }).emoji;
+        mctx.fillText(icon, hw + (p.c + 0.5) * cw, (p.r + 0.5) * ch);
+      });
+
+      (snap.zombies || []).forEach((z) => {
+        const zKey = z.t === 'bucket' ? 'zombie_bucket' : z.t === 'cone' ? 'zombie_cone' : 'zombie_regular';
+        const icon = (gameIcons[zKey] || DEFAULT_GAME_ICONS[zKey]).emoji;
+        const zx = hw + Math.max(0, Math.min(1, z.xr)) * (w - hw);
+        mctx.fillText(icon, zx, (z.r + 0.5) * ch);
+      });
+    }
+
+    function renderTeacherStudentCards() {
+      const gridEl = document.getElementById('teacherLawnsGrid');
+      const countEl = document.getElementById('connectedStudentCount');
+      const list = Object.values(classroom.studentsMap);
+      if (countEl) countEl.textContent = list.length;
+      if (!gridEl) return;
+
+      if (list.length === 0) {
+        gridEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:42px 20px;color:#bbf7d0;font-weight:800;font-size:0.95rem;background:rgba(0,0,0,0.25);border-radius:16px;border:2px dashed #22c55e;">📱 Waiting for students to scan the QR code or enter Room Code...</div>`;
+        return;
+      }
+
+      gridEl.innerHTML = '';
+      list.forEach((stu) => {
+        const inDanger = (stu.zombies || []).some((z) => z.xr < 0.25);
+        const card = document.createElement('div');
+        card.className = `student-lawn-card ${inDanger ? 'danger' : ''}`;
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <strong style="font-size:1rem;color:#0f172a;">🎓 ${stu.name}</strong>
+            <span style="font-size:0.78rem;font-weight:900;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;">☀️ ${stu.sun} • 🗣️ ${stu.wordsMastered}</span>
+          </div>
+          <canvas width="280" height="145" style="width:100%;height:auto;border-radius:10px;border:2px solid #78350f;"></canvas>
+          <div class="flex items-center justify-between" style="font-size:0.76rem;font-weight:800;color:#475569;">
+            <span>Card: ${stu.currentWord}</span>
+            <button type="button" class="game-btn" style="background:#059669;color:#fff;padding:4px 10px;font-size:0.74rem;">🔍 Visit Lawn</button>
+          </div>
+        `;
+        const miniCanvas = card.querySelector('canvas');
+        drawMiniLawnSnapshot(miniCanvas, stu);
+        card.querySelector('button').addEventListener('click', () => {
+          classroom.visitingStudentId = stu.studentId;
+          const vModal = document.getElementById('visitStudentModal');
+          if (vModal) vModal.classList.remove('hidden');
+          updateVisitStudentModal();
+        });
+        gridEl.appendChild(card);
+      });
+
+      if (classroom.visitingStudentId) updateVisitStudentModal();
+    }
+
+    function updateVisitStudentModal() {
+      const stu = classroom.studentsMap[classroom.visitingStudentId];
+      if (!stu) return;
+      const titleEl = document.getElementById('visitStudentTitle');
+      const badgeEl = document.getElementById('visitStudentStatsBadge');
+      const wordEl = document.getElementById('visitStudentLastWord');
+      const vCanvas = document.getElementById('visitLawnCanvas');
+      if (titleEl) titleEl.textContent = `👀 Visiting ${stu.name}'s Lawn`;
+      if (badgeEl) badgeEl.textContent = `☀️ ${stu.sun} • 🗣️ ${stu.wordsMastered} • 🌊 Wave ${stu.wave}`;
+      if (wordEl) wordEl.textContent = `Current Card: ${stu.currentWord}`;
+      drawMiniLawnSnapshot(vCanvas, stu);
+    }
+
+    async function hostClassroomSession() {
+      classroom.role = 'teacher';
+      classroom.roomCode = generateRoomCode();
+      classroom.sessionStatus = 'waiting';
+      classroom.studentsMap = {};
+      applyRoleRestrictions();
+
+      const codeDisplay = document.getElementById('teacherRoomCodeDisplay');
+      const bigCodeDisplay = document.getElementById('bigQrRoomCodeText');
+      const urlText = getJoinUrl(classroom.roomCode);
+      const bigUrlEl = document.getElementById('bigQrUrlText');
+      const syncBadge = document.getElementById('teacherSyncModeBadge');
+
+      if (codeDisplay) codeDisplay.textContent = classroom.roomCode;
+      if (bigCodeDisplay) bigCodeDisplay.textContent = classroom.roomCode;
+      if (bigUrlEl) bigUrlEl.textContent = urlText;
+
+      renderHighScanabilityQr(document.getElementById('teacherInlineQrContainer'), urlText, 168);
+      renderHighScanabilityQr(document.getElementById('bigQrContainer'), urlText, 280);
+
+      // Local same-browser BroadcastChannel + periodic heartbeat
+      if (classroom.broadcastChannel) classroom.broadcastChannel.close();
+      classroom.broadcastChannel = new BroadcastChannel(`pvz_room_${classroom.roomCode}`);
+      classroom.broadcastChannel.onmessage = (ev) => {
+        const msg = ev.data || {};
+        if (msg.type === 'student_state' && msg.payload) {
+          const norm = normalizeStudentRecord(msg.payload);
+          if (norm) {
+            classroom.studentsMap[norm.studentId] = norm;
+            renderTeacherStudentCards();
+          }
+        } else if (msg.type === 'student_join' || msg.type === 'request_status') {
+          if (msg.payload) {
+            const norm = normalizeStudentRecord(msg.payload);
+            if (norm) {
+              classroom.studentsMap[norm.studentId] = norm;
+              renderTeacherStudentCards();
+            }
+          }
+          classroom.broadcastChannel.postMessage({
+            type: 'room_status',
+            status: classroom.sessionStatus,
+            maxWaves: classroom.maxWaves,
+            ...buildTeacherRoomDeckFields()
+          });
+        }
+      };
+
+      if (classroom.hostHeartbeatInterval) clearInterval(classroom.hostHeartbeatInterval);
+      classroom.hostHeartbeatInterval = setInterval(() => {
+        if (classroom.role === 'teacher' && classroom.broadcastChannel) {
+          classroom.broadcastChannel.postMessage({
+            type: 'room_status',
+            status: classroom.sessionStatus,
+            maxWaves: classroom.maxWaves,
+            ...buildTeacherRoomDeckFields()
+          });
+        }
+      }, 1500);
+
+      const hasCloud = await initClassroomBackend();
+      if (syncBadge) {
+        syncBadge.textContent = hasCloud ? '☁️ Cloud Live Connected' : '🖥️ Same-Browser Tab Sync';
+      }
+
+      if (hasCloud && db && firebaseUser) {
+        try {
+          const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', classroom.roomCode);
+          await setDoc(roomRef, {
+            roomCode: classroom.roomCode,
+            status: 'waiting',
+            maxWaves: classroom.maxWaves,
+            ...buildTeacherRoomDeckFields(),
+            updatedAt: Date.now()
+          });
+
+          const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'student_states');
+          const initialSnap = await getDocs(studentsCol);
+          initialSnap.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data && ((data.roomCode || '').toUpperCase() === classroom.roomCode || docSnap.id.startsWith(`${classroom.roomCode}_`))) {
+              const norm = normalizeStudentRecord(data);
+              if (norm) classroom.studentsMap[norm.studentId || docSnap.id] = norm;
+            }
+          });
+          renderTeacherStudentCards();
+
+          if (classroom.unsubStudents) classroom.unsubStudents();
+          classroom.unsubStudents = onSnapshot(
+            studentsCol,
+            (snapshot) => {
+              snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                if (data && ((data.roomCode || '').toUpperCase() === classroom.roomCode || docSnap.id.startsWith(`${classroom.roomCode}_`))) {
+                  const norm = normalizeStudentRecord(data);
+                  if (norm) classroom.studentsMap[norm.studentId || docSnap.id] = norm;
+                }
+              });
+              renderTeacherStudentCards();
+            },
+            (err) => {
+              console.warn('Student lawns listener error:', err);
+            }
+          );
+        } catch (e) {
+          console.warn('Host cloud setup error:', e);
+        }
+      }
+    }
+
+    async function setClassroomPlayState(newStatus) {
+      classroom.sessionStatus = newStatus;
+      const statusBadge = document.getElementById('teacherSessionStatusBadge');
+      const startBtn = document.getElementById('btnTeacherStartClass');
+      const pauseBtn = document.getElementById('btnTeacherPauseClass');
+
+      if (newStatus === 'playing') {
+        if (statusBadge) {
+          statusBadge.textContent = '▶️ Class Playing Live';
+          statusBadge.style.background = '#dcfce7';
+          statusBadge.style.color = '#166534';
+        }
+        startBtn?.classList.add('hidden');
+        pauseBtn?.classList.remove('hidden');
+      } else {
+        if (statusBadge) {
+          statusBadge.textContent = '⏸️ Class Paused';
+          statusBadge.style.background = '#fef3c7';
+          statusBadge.style.color = '#92400e';
+        }
+        startBtn?.classList.remove('hidden');
+        pauseBtn?.classList.add('hidden');
+      }
+
+      if (classroom.broadcastChannel) {
+        classroom.broadcastChannel.postMessage({
+          type: 'room_status',
+          status: newStatus,
+          maxWaves: classroom.maxWaves,
+          ...buildTeacherRoomDeckFields()
+        });
+      }
+      if (db && firebaseUser && classroom.roomCode) {
+        try {
+          const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', classroom.roomCode);
+          await setDoc(roomRef, {
+            roomCode: classroom.roomCode,
+            status: newStatus,
+            maxWaves: classroom.maxWaves,
+            ...buildTeacherRoomDeckFields(),
+            updatedAt: Date.now()
+          }, { merge: true });
+        } catch (e) {
+          console.warn('Room status update error:', e);
+        }
+      }
+      showToast(newStatus === 'playing' ? '▶️ Unlocked! Students can now defend their lawns!' : '⏸️ Class paused.');
+    }
+
+    async function joinClassroomAsStudent(rawName, rawCode) {
+      const cleanName = (rawName || '').trim() || 'Student';
+      const cleanCode = (rawCode || '').trim().toUpperCase();
+      if (!cleanCode || cleanCode.length < 4) {
+        showToast('Please enter the 5-letter Room Code from your teacher!', true);
+        return;
+      }
+
+      stopIpadQrScanner();
+      classroom.role = 'student';
+      classroom.studentName = cleanName;
+      classroom.roomCode = cleanCode;
+      classroom.sessionStatus = 'waiting';
+      applyRoleRestrictions();
+
+      function applyTeacherStatus(newStatus, incomingMaxWaves, roomPayload = null) {
+        if (roomPayload) {
+          applyTeacherDeckPayload(roomPayload);
+        }
+        if (incomingMaxWaves && !isNaN(Number(incomingMaxWaves))) {
+          const parsedWaves = Number(incomingMaxWaves);
+          state.maxWaves = parsedWaves;
+          const waveSel = document.getElementById('wavesSelect');
+          if (waveSel) waveSel.value = String(parsedWaves);
+          updateSunUI();
+        }
+        if (!newStatus) return;
+        const prev = classroom.sessionStatus;
+        classroom.sessionStatus = newStatus;
+        if (newStatus === 'playing') {
+          document.getElementById('studentWaitingOverlay')?.classList.add('hidden');
+          document.getElementById('pauseOverlay')?.classList.add('hidden');
+          resizeCanvas();
+          if (!state.started) {
+            resetGame();
+          } else {
+            state.paused = false;
+            loadNextCard(false);
+          }
+          if (prev !== 'playing') {
+            showToast('🚀 Your teacher started the game! Defend your house!');
+          }
+        } else if (newStatus === 'paused') {
+          state.paused = true;
+          const titleEl = document.getElementById('studentWaitingTitle');
+          const subEl = document.getElementById('studentWaitingSub');
+          if (titleEl) titleEl.textContent = '⏸️ Class Paused by Teacher';
+          if (subEl) subEl.innerHTML = 'Eyes on your teacher! The game will resume when your teacher clicks <strong>Play</strong>.';
+          document.getElementById('studentWaitingOverlay')?.classList.remove('hidden');
+        }
+      }
+
+      if (classroom.broadcastChannel) classroom.broadcastChannel.close();
+      classroom.broadcastChannel = new BroadcastChannel(`pvz_room_${cleanCode}`);
+      classroom.broadcastChannel.onmessage = (ev) => {
+        const msg = ev.data || {};
+        if (msg.type === 'room_status' && msg.status) {
+          applyTeacherStatus(msg.status, msg.maxWaves, msg);
+        }
+      };
+
+      const hasCloud = await initClassroomBackend();
+      if (hasCloud && db && firebaseUser) {
+        const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', cleanCode);
+        try {
+          const initialRoom = await getDoc(roomRef);
+          if (initialRoom.exists()) {
+            const rData = initialRoom.data();
+            applyTeacherStatus(rData?.status, rData?.maxWaves, rData);
+          }
+        } catch (e) {}
+
+        if (classroom.unsubRoom) classroom.unsubRoom();
+        classroom.unsubRoom = onSnapshot(
+          roomRef,
+          (docSnap) => {
+            if (docSnap.exists()) {
+              const rData = docSnap.data();
+              applyTeacherStatus(rData?.status, rData?.maxWaves, rData);
+            }
+          },
+          (err) => {
+            console.warn('Room status listener error:', err);
+          }
+        );
+      }
+
+      const sendStudentHeartbeat = async () => {
+        if (classroom.role !== 'student') return;
+        const fullSnap = buildStudentSnapshot();
+        const cloudSafeSnap = {
+          studentId: fullSnap.studentId,
+          roomCode: fullSnap.roomCode,
+          name: fullSnap.name,
+          sun: fullSnap.sun,
+          wordsMastered: fullSnap.wordsMastered,
+          wave: fullSnap.wave,
+          gameOver: fullSnap.gameOver,
+          victory: fullSnap.victory,
+          currentWord: fullSnap.currentWord,
+          plantsJson: fullSnap.plantsJson,
+          zombiesJson: fullSnap.zombiesJson,
+          updatedAt: fullSnap.updatedAt
+        };
+        if (classroom.broadcastChannel) {
+          classroom.broadcastChannel.postMessage({ type: 'student_state', payload: fullSnap });
+          if (classroom.sessionStatus !== 'playing') {
+            classroom.broadcastChannel.postMessage({ type: 'request_status', studentId: classroom.studentId, payload: fullSnap });
+          }
+        }
+        if (db && firebaseUser && classroom.roomCode) {
+          try {
+            const stuRef = doc(db, 'artifacts', appId, 'public', 'data', 'student_states', `${classroom.roomCode}_${classroom.studentId}`);
+            await setDoc(stuRef, cloudSafeSnap);
+          } catch (e) {
+            console.warn('Student cloud state write error:', e);
+          }
+        }
+      };
+
+      await sendStudentHeartbeat();
+
+      // Stagger simultaneous iPad sync intervals (1400ms–2100ms) so 30 iPads don't burst at the exact same millisecond
+      const jitteredIntervalMs = 1400 + Math.floor(Math.random() * 700);
+      if (classroom.syncInterval) clearInterval(classroom.syncInterval);
+      classroom.syncInterval = setInterval(sendStudentHeartbeat, jitteredIntervalMs);
+
+      showToast(`🎓 Joined Room ${cleanCode}! Waiting for teacher to start...`);
+    }
+
+    /*************************************************************************
+     * 5. MAIN ANIMATION LOOP & UI EVENT WIRING
+     *************************************************************************/
+    let lastFrameTime = performance.now();
+    function gameLoop(now) {
+      const dt = Math.min(80, now - lastFrameTime);
+      lastFrameTime = now;
+      updateSimulation(dt);
+      drawGame();
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      resizeCanvas();
+      syncGlobalThemeIcons();
+      updateSunUI();
+      loadNextCard(false);
+      setupSpeechRecognition();
+      subscribeGlobalSharedDeck();
+
+      // Seed selection & shovel buttons
+      document.querySelectorAll('.seed-card[data-plant]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.selectedTool = btn.getAttribute('data-plant');
+          updateSunUI();
+        });
+      });
+      document.getElementById('toolShovel')?.addEventListener('click', () => {
+        state.selectedTool = 'shovel';
+        updateSunUI();
+      });
+
+      // Start & Pause controls
+      document.getElementById('btnStartGame')?.addEventListener('click', resetGame);
+      document.getElementById('btnPlayAgain')?.addEventListener('click', resetGame);
+      document.getElementById('btnPause')?.addEventListener('click', () => {
+        if (!state.started || classroom.role === 'student') return;
+        state.paused = !state.paused;
+        document.getElementById('pauseOverlay')?.classList.toggle('hidden', !state.paused);
+      });
+      document.getElementById('btnResumeOverlay')?.addEventListener('click', () => {
+        state.paused = false;
+        document.getElementById('pauseOverlay')?.classList.add('hidden');
+      });
+      document.getElementById('btnMute')?.addEventListener('click', (e) => {
+        state.muted = !state.muted;
+        e.currentTarget.textContent = state.muted ? '🔇' : '🔊';
+      });
+
+      // Pronunciation & Riddle Card Buttons
+      document.getElementById('btnSpeakMic')?.addEventListener('click', () => {
+        if (!recognition) {
+          showToast('🎤 Speech recognition not supported here — type your answer below!', true);
+          return;
+        }
+        if (isListening) {
+          try { recognition.stop(); } catch (e) {}
+        } else {
+          try { recognition.start(); } catch (e) {}
+        }
+      });
+      document.getElementById('btnHearWord')?.addEventListener('click', speakPromptOutLoud);
+      document.getElementById('btnSubmitTyped')?.addEventListener('click', () => {
+        const inp = document.getElementById('typedAnswerInput');
+        if (!inp) return;
+        handleAnswerSubmission(inp.value);
+        inp.value = '';
+      });
+      document.getElementById('typedAnswerInput')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleAnswerSubmission(e.currentTarget.value);
+          e.currentTarget.value = '';
+        }
+      });
+      document.getElementById('btnTeacherApprove')?.addEventListener('click', () => {
+        if (classroom.role === 'student') return;
+        if (state.currentCard) handleAnswerSubmission(state.currentCard.answer);
+      });
+      document.getElementById('btnSkipCard')?.addEventListener('click', () => {
+        loadNextCard(true);
+      });
+
+      // Deck, Waves, Speed, Difficulty selectors
+      document.getElementById('topicSelect')?.addEventListener('change', (e) => {
+        state.category = e.target.value;
+        state.cardIndex = 0;
+        loadNextCard(false);
+        syncTeacherDeckToClass();
+      });
+      function updateSelectedWaveLength(rawVal) {
+        const parsed = parseInt(rawVal, 10) || 3;
+        state.maxWaves = parsed;
+        classroom.maxWaves = parsed;
+        const footerSel = document.getElementById('wavesSelect');
+        const teacherSel = document.getElementById('teacherWavesSelect');
+        if (footerSel) footerSel.value = String(parsed);
+        if (teacherSel) teacherSel.value = String(parsed);
+        updateSunUI();
+        if (classroom.role === 'teacher') {
+          if (classroom.broadcastChannel) {
+            classroom.broadcastChannel.postMessage({ type: 'room_status', status: classroom.sessionStatus, maxWaves: parsed });
+          }
+          if (db && firebaseUser && classroom.roomCode) {
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', classroom.roomCode);
+            setDoc(roomRef, { maxWaves: parsed, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+          }
+        }
+      }
+      document.getElementById('wavesSelect')?.addEventListener('change', (e) => {
+        updateSelectedWaveLength(e.target.value);
+      });
+      document.getElementById('teacherWavesSelect')?.addEventListener('change', (e) => {
+        updateSelectedWaveLength(e.target.value);
+        showToast(`🌊 Class length set to ${parsedLabel(e.target.value)}!`);
+      });
+      function parsedLabel(val) {
+        return Number(val) >= 999 ? 'Endless Practice' : `${val} Waves`;
+      }
+      document.getElementById('speedSelect')?.addEventListener('change', (e) => {
+        state.speedMultiplier = parseFloat(e.target.value) || 1;
+      });
+      document.getElementById('difficultySelect')?.addEventListener('change', (e) => {
+        state.difficulty = e.target.value;
+      });
+
+      // Classroom Host & Join Listeners
+      document.getElementById('btnClassroomHost')?.addEventListener('click', hostClassroomSession);
+      document.getElementById('btnTeacherStartClass')?.addEventListener('click', () => setClassroomPlayState('playing'));
+      document.getElementById('btnTeacherPauseClass')?.addEventListener('click', () => setClassroomPlayState('paused'));
+      document.getElementById('btnRefreshStudentLawns')?.addEventListener('click', async () => {
+        if (db && firebaseUser && classroom.roomCode) {
+          try {
+            const studentsCol = collection(db, 'artifacts', appId, 'public', 'data', 'student_states');
+            const snap = await getDocs(studentsCol);
+            snap.forEach((docSnap) => {
+              const data = docSnap.data();
+              if (data && ((data.roomCode || '').toUpperCase() === classroom.roomCode || docSnap.id.startsWith(`${classroom.roomCode}_`))) {
+                const norm = normalizeStudentRecord(data);
+                if (norm) classroom.studentsMap[norm.studentId || docSnap.id] = norm;
+              }
+            });
+          } catch (e) {}
+        }
+        renderTeacherStudentCards();
+        showToast('🔄 Refreshed live student lawns!');
+      });
+      document.getElementById('btnShowBigQrModal')?.addEventListener('click', () => {
+        document.getElementById('bigQrModal')?.classList.remove('hidden');
+      });
+      document.getElementById('btnCloseBigQrModal')?.addEventListener('click', () => {
+        document.getElementById('bigQrModal')?.classList.add('hidden');
+      });
+      document.getElementById('btnCopyRoomLink')?.addEventListener('click', () => {
+        const url = getJoinUrl(classroom.roomCode, true);
+        const tmp = document.createElement('textarea');
+        tmp.value = url;
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmp);
+        showToast('🔗 Room join link copied to clipboard!');
+      });
+      document.getElementById('btnCopyJoinPageOnlyLink')?.addEventListener('click', () => {
+        const url = getJoinUrl('', true);
+        const tmp = document.createElement('textarea');
+        tmp.value = url;
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmp);
+        showToast('🎓 Student Join Page link copied to clipboard!');
+      });
+      document.getElementById('btnExitTeacherMode')?.addEventListener('click', () => {
+        classroom.role = 'solo';
+        classroom.roomCode = '';
+        if (classroom.hostHeartbeatInterval) clearInterval(classroom.hostHeartbeatInterval);
+        if (classroom.unsubStudents) classroom.unsubStudents();
+        applyRoleRestrictions();
+        resizeCanvas();
+      });
+
+      document.getElementById('btnStudentJoinModal')?.addEventListener('click', () => {
+        openStudentJoinPage();
+      });
+      document.getElementById('btnScanQrWithIpad')?.addEventListener('click', () => {
+        startIpadQrScanner();
+      });
+      document.getElementById('btnStopIpadScanner')?.addEventListener('click', () => {
+        stopIpadQrScanner();
+      });
+      document.getElementById('btnBackFromJoinPage')?.addEventListener('click', () => {
+        closeStudentJoinPage();
+      });
+      document.getElementById('btnConfirmJoinRoom')?.addEventListener('click', () => {
+        const nameVal = document.getElementById('inputStudentName')?.value;
+        const codeVal = document.getElementById('inputJoinRoomCode')?.value;
+        joinClassroomAsStudent(nameVal, codeVal);
+      });
+      document.getElementById('inputJoinRoomCode')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const nameVal = document.getElementById('inputStudentName')?.value;
+          const codeVal = document.getElementById('inputJoinRoomCode')?.value;
+          joinClassroomAsStudent(nameVal, codeVal);
+        }
+      });
+
+      document.getElementById('btnCloseVisitModal')?.addEventListener('click', () => {
+        classroom.visitingStudentId = null;
+        document.getElementById('visitStudentModal')?.classList.add('hidden');
+      });
+      document.getElementById('btnDoneVisitModal')?.addEventListener('click', () => {
+        classroom.visitingStudentId = null;
+        document.getElementById('visitStudentModal')?.classList.add('hidden');
+      });
+
+      // Auto-open dedicated Join Class Page if URL has ?page=join, ?room=XXXXX, or #join
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomParam = urlParams.get('room');
+      const pageParam = urlParams.get('page');
+      if (roomParam || pageParam === 'join' || window.location.hash === '#join') {
+        openStudentJoinPage(roomParam || '');
+      }
+
+      window.addEventListener('hashchange', () => {
+        if (window.location.hash === '#join') {
+          openStudentJoinPage();
+        }
+      });
+
+      // Game Icons Customizer Modal Wiring
+      const ICON_THEME_PRESETS = {
+        classic: { sunflower: '🌻', peashooter: '🌱', wallnut: '🥔', snowpea: '❄️', cherrybomb: '🍒', zombie_regular: '🧟', zombie_cone: '🧟‍♂️', zombie_bucket: '🤖', sun: '☀️', lawnmower: '🚜', house: '🏡' },
+        space: { sunflower: '🛰️', peashooter: '🚀', wallnut: '🪐', snowpea: '☄️', cherrybomb: '💥', zombie_regular: '👾', zombie_cone: '👽', zombie_bucket: '🛸', sun: '⭐', lawnmower: '🛸', house: '🏰' },
+        dino: { sunflower: '🌴', peashooter: '🦖', wallnut: '🥚', snowpea: '🦕', cherrybomb: '🌋', zombie_regular: '🐊', zombie_cone: '🦂', zombie_bucket: '🐉', sun: '☀️', lawnmower: '🚙', house: '🏕️' },
+        ocean: { sunflower: '🐚', peashooter: '🐙', wallnut: '🐢', snowpea: '🐬', cherrybomb: '🐡', zombie_regular: '🦈', zombie_cone: '🦀', zombie_bucket: '🦑', sun: '🫧', lawnmower: '🚤', house: '🏝️' }
+      };
+
+      // Compress pasted or uploaded image files into lightweight Data URLs for localStorage & JSON export
+      function compressImageFileToDataUrl(file, maxDim = 220) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const img = new Image();
+            img.onload = () => {
+              const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+              const w = Math.max(1, Math.round(img.width * scale));
+              const h = Math.max(1, Math.round(img.height * scale));
+              const c = document.createElement('canvas');
+              c.width = w;
+              c.height = h;
+              const cctx = c.getContext('2d');
+              cctx.clearRect(0, 0, w, h);
+              cctx.drawImage(img, 0, 0, w, h);
+              resolve(c.toDataURL('image/webp', 0.84));
+            };
+            img.onerror = reject;
+            img.src = String(reader.result || '');
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function extractImageFileFromClipboardEvent(e) {
+        const items = e.clipboardData && e.clipboardData.items;
+        if (!items) return null;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type && items[i].type.startsWith('image/')) {
+            return items[i].getAsFile();
+          }
+        }
+        return null;
+      }
+
+      function renderIconsEditorList() {
+        const container = document.getElementById('iconsEditorGrid');
+        if (!container) return;
+        container.innerHTML = '';
+        Object.keys(DEFAULT_GAME_ICONS).forEach((key) => {
+          const item = gameIcons[key] || DEFAULT_GAME_ICONS[key];
+          const row = document.createElement('div');
+          row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:6px;background:#fff;border:2px solid #fde68a;border-radius:12px;padding:7px 10px;';
+          row.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+              <span style="font-size:0.82rem;font-weight:900;color:#334155;">${item.label}</span>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <input type="text" readonly placeholder="📋 Paste img" data-paste-icon="${key}" style="width:94px;font-size:0.7rem;font-weight:800;padding:3px 6px;border:1.5px dashed #f59e0b;border-radius:7px;background:#fffbeb;color:#92400e;cursor:pointer;" title="Click and press Ctrl+V / Cmd+V to paste an image" />
+                <label style="background:#e0f2fe;color:#0369a1;font-size:0.7rem;font-weight:900;padding:3px 6px;border-radius:7px;cursor:pointer;" title="Upload image file">
+                  📁<input type="file" accept="image/*" data-upload-icon="${key}" class="hidden" />
+                </label>
+                ${item.image ? `<button type="button" data-clear-icon-img="${key}" style="background:#fee2e2;color:#991b1b;border:none;border-radius:6px;padding:2px 6px;font-size:0.7rem;font-weight:900;cursor:pointer;" title="Remove custom image">✖</button>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${item.image ? `<img src="${item.image}" alt="${item.label}" style="width:40px;height:40px;object-fit:contain;border-radius:8px;border:2px solid #22c55e;background:#f8fafc;" />` : ''}
+              <input type="text" maxlength="4" data-icon-key="${key}" value="${item.emoji}" class="input-field" style="width:52px;text-align:center;font-size:1.15rem;padding:4px;" title="Fallback Emoji" />
+            </div>
+          `;
+
+          const pasteBox = row.querySelector(`[data-paste-icon="${key}"]`);
+          pasteBox?.addEventListener('paste', async (e) => {
+            const imgFile = extractImageFileFromClipboardEvent(e);
+            if (!imgFile) {
+              showToast('📋 Copy an image first, then press Ctrl+V / Cmd+V here!', true);
+              return;
+            }
+            e.preventDefault();
+            const dataUrl = await compressImageFileToDataUrl(imgFile, 160);
+            gameIcons[key].image = dataUrl;
+            renderIconsEditorList();
+            showToast(`🖼️ Pasted custom picture for ${item.label}!`);
+          });
+
+          const fileInp = row.querySelector(`[data-upload-icon="${key}"]`);
+          fileInp?.addEventListener('change', async (e) => {
+            const f = e.target.files && e.target.files[0];
+            if (!f) return;
+            const dataUrl = await compressImageFileToDataUrl(f, 160);
+            gameIcons[key].image = dataUrl;
+            renderIconsEditorList();
+            showToast(`🖼️ Uploaded custom picture for ${item.label}!`);
+          });
+
+          const clearBtn = row.querySelector(`[data-clear-icon-img="${key}"]`);
+          clearBtn?.addEventListener('click', () => {
+            gameIcons[key].image = null;
+            renderIconsEditorList();
+          });
+
+          container.appendChild(row);
+        });
+      }
+
+      document.getElementById('btnCustomizeIcons')?.addEventListener('click', () => {
+        renderIconsEditorList();
+        document.getElementById('iconsModal')?.classList.remove('hidden');
+      });
+      document.getElementById('btnCloseIconsModal')?.addEventListener('click', () => {
+        document.getElementById('iconsModal')?.classList.add('hidden');
+      });
+      document.querySelectorAll('.icon-preset-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const preset = ICON_THEME_PRESETS[btn.getAttribute('data-preset')];
+          if (!preset) return;
+          Object.keys(preset).forEach((k) => {
+            if (gameIcons[k]) {
+              gameIcons[k].emoji = preset[k];
+              gameIcons[k].image = null;
+            }
+          });
+          renderIconsEditorList();
+        });
+      });
+      document.getElementById('btnResetDefaultIcons')?.addEventListener('click', () => {
+        gameIcons = JSON.parse(JSON.stringify(DEFAULT_GAME_ICONS));
+        localStorage.removeItem('pvz_custom_icons_v1');
+        renderIconsEditorList();
+        syncGlobalThemeIcons();
+        showToast('🔄 Icons reset to Classic Garden defaults!');
+      });
+      document.getElementById('btnSaveIconsDone')?.addEventListener('click', () => {
+        document.querySelectorAll('#iconsEditorGrid input[data-icon-key]').forEach((inp) => {
+          const k = inp.getAttribute('data-icon-key');
+          if (gameIcons[k] && inp.value.trim()) {
+            gameIcons[k].emoji = inp.value.trim();
+          }
+        });
+        try { localStorage.setItem('pvz_custom_icons_v1', JSON.stringify(gameIcons)); } catch (e) {}
+        syncGlobalThemeIcons();
+        syncTeacherDeckToClass();
+        document.getElementById('iconsModal')?.classList.add('hidden');
+        showToast('🎨 Game icons updated & synced for everyone!');
+      });
+
+      // Custom Questions Studio Modal Wiring (with Copy & Paste Image Support)
+      let pendingNewQuestionImage = null;
+
+      function setPendingQuestionImage(dataUrl) {
+        pendingNewQuestionImage = dataUrl;
+        const prevImg = document.getElementById('newQImagePreview');
+        const statusEl = document.getElementById('newQImageStatus');
+        const clearBtn = document.getElementById('btnClearNewQImage');
+        if (dataUrl) {
+          if (prevImg) {
+            prevImg.src = dataUrl;
+            prevImg.classList.remove('hidden');
+          }
+          if (statusEl) statusEl.innerHTML = '✅ <strong>Picture attached!</strong> Ready to add to deck.';
+          clearBtn?.classList.remove('hidden');
+        } else {
+          if (prevImg) {
+            prevImg.src = '';
+            prevImg.classList.add('hidden');
+          }
+          if (statusEl) statusEl.innerHTML = '📋 Click here &amp; press <strong>Ctrl+V / Cmd+V</strong> to paste a copied picture!';
+          clearBtn?.classList.add('hidden');
+        }
+      }
+
+      const pasteZone = document.getElementById('newQImagePasteZone');
+      pasteZone?.addEventListener('click', () => pasteZone.focus());
+      pasteZone?.addEventListener('paste', async (e) => {
+        const imgFile = extractImageFileFromClipboardEvent(e);
+        if (!imgFile) {
+          showToast('📋 Copy an image first, then press Ctrl+V / Cmd+V!', true);
+          return;
+        }
+        e.preventDefault();
+        const dataUrl = await compressImageFileToDataUrl(imgFile, 280);
+        setPendingQuestionImage(dataUrl);
+        showToast('🖼️ Picture pasted into flashcard!');
+      });
+
+      // Also support pasting directly anywhere inside the Custom Questions modal
+      document.getElementById('customQuestionsModal')?.addEventListener('paste', async (e) => {
+        const imgFile = extractImageFileFromClipboardEvent(e);
+        if (!imgFile) return;
+        e.preventDefault();
+        const dataUrl = await compressImageFileToDataUrl(imgFile, 280);
+        setPendingQuestionImage(dataUrl);
+        showToast('🖼️ Picture pasted into flashcard!');
+      });
+
+      document.getElementById('newQImageFileInput')?.addEventListener('change', async (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        const dataUrl = await compressImageFileToDataUrl(f, 280);
+        setPendingQuestionImage(dataUrl);
+        showToast('🖼️ Picture selected!');
+      });
+
+      document.getElementById('btnClearNewQImage')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setPendingQuestionImage(null);
+      });
+
+      function renderCustomQuestionsList() {
+        const listEl = document.getElementById('customQuestionsList');
+        const countEl = document.getElementById('customQuestionsCount');
+        if (countEl) countEl.textContent = customQuestions.length;
+        if (!listEl) return;
+        if (customQuestions.length === 0) {
+          listEl.innerHTML = `<div style="text-align:center;padding:16px;color:#64748b;font-size:0.84rem;font-weight:700;">No custom cards yet — add your first word, question, or pasted picture above!</div>`;
+          return;
+        }
+        listEl.innerHTML = '';
+        customQuestions.forEach((q, idx) => {
+          const card = document.createElement('div');
+          card.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:2px solid #cbd5e1;border-radius:10px;padding:7px 10px;';
+          const thumbHtml = q.image
+            ? `<img src="${q.image}" alt="" style="width:36px;height:36px;object-fit:contain;border-radius:6px;border:1.5px solid #cbd5e1;flex-shrink:0;" />`
+            : `<span style="font-size:1.3rem;">${q.emoji || '🌟'}</span>`;
+          card.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;font-size:0.84rem;font-weight:800;color:#0f172a;min-width:0;">
+              ${thumbHtml}
+              <div style="overflow:hidden;text-overflow:ellipsis;"><strong>${q.display}</strong> → <span style="color:#059669;">${q.answer}</span></div>
+            </div>
+            <button type="button" data-del-idx="${idx}" style="background:#fee2e2;color:#991b1b;border:none;border-radius:8px;padding:4px 8px;font-weight:900;cursor:pointer;flex-shrink:0;">🗑️</button>
+          `;
+          card.querySelector('button').addEventListener('click', () => {
+            customQuestions.splice(idx, 1);
+            try { localStorage.setItem('pvz_custom_questions_v1', JSON.stringify(customQuestions)); } catch (e) {}
+            renderCustomQuestionsList();
+            syncTeacherDeckToClass();
+          });
+          listEl.appendChild(card);
+        });
+      }
+
+      document.getElementById('btnCustomStudio')?.addEventListener('click', () => {
+        setPendingQuestionImage(null);
+        renderCustomQuestionsList();
+        document.getElementById('customQuestionsModal')?.classList.remove('hidden');
+      });
+      document.getElementById('btnCloseCustomModal')?.addEventListener('click', () => {
+        document.getElementById('customQuestionsModal')?.classList.add('hidden');
+      });
+      document.getElementById('btnAddCustomQuestion')?.addEventListener('click', () => {
+        const display = document.getElementById('newQDisplay')?.value.trim();
+        const answer = document.getElementById('newQAnswer')?.value.trim();
+        const emoji = document.getElementById('newQEmoji')?.value.trim() || '🌟';
+        const type = document.getElementById('newQType')?.value || 'word';
+        const synsRaw = document.getElementById('newQSynonyms')?.value || '';
+        if (!display || !answer) {
+          showToast('Please fill in both the Prompt and Answer!', true);
+          return;
+        }
+        const synonyms = synsRaw.split(',').map((s) => s.trim()).filter(Boolean);
+        customQuestions.push({
+          type,
+          display,
+          answer,
+          synonyms,
+          emoji,
+          image: pendingNewQuestionImage || null,
+          sunReward: 50
+        });
+        try {
+          localStorage.setItem('pvz_custom_questions_v1', JSON.stringify(customQuestions));
+        } catch (e) {
+          showToast('⚠️ Storage almost full — export your JSON pack to save!', true);
+        }
+        document.getElementById('newQDisplay').value = '';
+        document.getElementById('newQAnswer').value = '';
+        document.getElementById('newQSynonyms').value = '';
+        setPendingQuestionImage(null);
+        const topicSel = document.getElementById('topicSelect');
+        if (topicSel) topicSel.value = 'custom';
+        state.category = 'custom';
+        state.cardIndex = customQuestions.length - 1;
+        loadNextCard(false);
+        renderCustomQuestionsList();
+        syncTeacherDeckToClass();
+        showToast('✅ Added custom card & published for everyone!');
+      });
+
+      // Unified Export / Import JSON Pack Modal Wiring
+      document.getElementById('btnPackManager')?.addEventListener('click', () => {
+        const ta = document.getElementById('textareaPackJson');
+        if (ta) ta.value = JSON.stringify({ icons: gameIcons, questions: customQuestions }, null, 2);
+        document.getElementById('packManagerModal')?.classList.remove('hidden');
+      });
+      document.getElementById('btnClosePackModal')?.addEventListener('click', () => {
+        document.getElementById('packManagerModal')?.classList.add('hidden');
+      });
+      document.getElementById('btnDownloadJsonPack')?.addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify({ icons: gameIcons, questions: customQuestions }, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'oh-no-zombies-pack.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('📦 Downloaded oh-no-zombies-pack.json!');
+      });
+      function applyImportedJsonText(rawText) {
+        try {
+          const parsed = JSON.parse(rawText);
+          if (parsed.icons && typeof parsed.icons === 'object') {
+            gameIcons = { ...gameIcons, ...parsed.icons };
+            localStorage.setItem('pvz_custom_icons_v1', JSON.stringify(gameIcons));
+            syncGlobalThemeIcons();
+          }
+          if (Array.isArray(parsed.questions)) {
+            customQuestions = parsed.questions;
+            localStorage.setItem('pvz_custom_questions_v1', JSON.stringify(customQuestions));
+            if (customQuestions.length > 0) {
+              state.category = 'custom';
+              const topicSel = document.getElementById('topicSelect');
+              if (topicSel) topicSel.value = 'custom';
+              loadNextCard(false);
+            }
+          }
+          syncTeacherDeckToClass();
+          document.getElementById('packManagerModal')?.classList.add('hidden');
+          showToast('✅ JSON Pack imported & published for everyone!');
+        } catch (err) {
+          showToast('❌ Invalid JSON format — please check the file!', true);
+        }
+      }
+      document.getElementById('btnImportPastedJson')?.addEventListener('click', () => {
+        const val = document.getElementById('textareaPackJson')?.value || '';
+        applyImportedJsonText(val);
+      });
+      document.getElementById('inputUploadJsonFile')?.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => applyImportedJsonText(String(reader.result || ''));
+        reader.readAsText(file);
+      });
+
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+</html>
