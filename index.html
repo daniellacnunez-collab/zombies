@@ -114,15 +114,80 @@
       background: #ffffff;
       border: 3px solid #f59e0b;
       border-radius: 18px;
-      padding: 14px 12px;
+      padding: 12px 10px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 185px;
+      gap: 6px;
+      min-height: 150px;
       box-shadow: inset 0 2px 8px rgba(245, 158, 11, 0.12);
+    }
+
+    .quiz-options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .quiz-option-btn {
+      background: #ffffff;
+      color: #0f172a;
+      border: 3px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 9px 8px;
+      font-weight: 900;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 54px;
+      box-shadow: 0 3px 0 #cbd5e1;
+      transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .quiz-option-btn:hover {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      transform: translateY(-1px);
+    }
+    .quiz-option-btn:active {
+      transform: translateY(1px);
+    }
+    .quiz-option-btn.correct-flash {
+      background: #dcfce7 !important;
+      border-color: #16a34a !important;
+      color: #14532d !important;
+      box-shadow: 0 3px 0 #16a34a !important;
+    }
+    .quiz-option-btn.wrong-flash {
+      background: #fee2e2 !important;
+      border-color: #ef4444 !important;
+      color: #7f1d1d !important;
+      box-shadow: 0 3px 0 #ef4444 !important;
+    }
+
+    .audio-choice-row {
+      background: #ffffff;
+      border: 3px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      box-shadow: 0 3px 0 #cbd5e1;
+    }
+    .audio-choice-row.correct-flash {
+      background: #dcfce7 !important;
+      border-color: #16a34a !important;
+    }
+    .audio-choice-row.wrong-flash {
+      background: #fee2e2 !important;
+      border-color: #ef4444 !important;
     }
 
     /* Right Lawn & Seed Tray Column */
@@ -330,6 +395,8 @@
   </style>
   <!-- High-Scanability QR Code Generator -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Zero-Setup Cross-Device Classroom Sync (WebRTC PeerJS) -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
 
@@ -342,8 +409,8 @@
     </div>
 
     <div class="header-stats">
-      <div class="stat-pill" title="Words & Questions Pronounced Correctly">
-        <span>🗣️ Mastered:</span>
+      <div class="stat-pill" title="Questions & Cards Answered Correctly">
+        <span>✅ Solved:</span>
         <span id="wordsMasteredCount" style="color:#4ade80;">0</span>
       </div>
       <div class="stat-pill" title="Current Correct Streak">
@@ -369,6 +436,9 @@
       <button id="btnCustomizeIcons" class="game-btn" style="background:#db2777;color:#fff;padding:6px 12px;font-size:0.8rem;">
         <span>🎨</span><span>Game Icons</span>
       </button>
+      <button id="btnSelectFamily" class="game-btn" style="background:#ea580c;color:#fff;padding:6px 12px;font-size:0.8rem;" title="Choose who is inside the house">
+        <span>👨‍👩‍👧‍👦</span><span>Family in House</span>
+      </button>
       <button id="btnCustomStudio" class="game-btn" style="background:#4f46e5;color:#fff;padding:6px 12px;font-size:0.8rem;">
         <span>📝</span><span>Custom Questions</span>
       </button>
@@ -393,12 +463,12 @@
           Room Code: <span id="teacherRoomCodeDisplay" style="font-family:monospace;background:#451a03;color:#fde047;padding:2px 12px;border-radius:10px;letter-spacing:3px;">-----</span>
         </h2>
         <p style="font-size:0.84rem;color:#78350f;font-weight:700;line-height:1.4;margin-bottom:12px;">
-          Students scan the QR code or click <strong>Join Class</strong> with the Room Code. Students cannot play until you press <strong>Play</strong> below, and their self-approve button is disabled.
+          Students who join can immediately answer picture &amp; audio challenges to stock up on <strong>Suns ☀️</strong>! When you click <strong>Start Class Game</strong>, zombies attack and everyone starts defending their house together.
         </p>
 
         <div class="flex items-center gap-2 flex-wrap">
           <button id="btnTeacherStartClass" class="game-btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:11px 22px;font-size:1rem;border:3px solid #a7f3d0;">
-            ▶️ Start Class Game (Unlock Students)
+            ▶️ Start Class Game (Unleash Zombies!)
           </button>
           <button id="btnTeacherPauseClass" class="game-btn hidden" style="background:#d97706;color:#fff;padding:11px 18px;font-size:0.95rem;">
             ⏸️ Pause All Students
@@ -498,57 +568,57 @@
   </section>
 
   <!-- MAIN GAME ARENA (PRONUNCIATION STUDIO + LAWN DEFENSE) -->
+  <!-- MAIN GAME ARENA (INTERACTIVE QUIZ STUDIO + LAWN DEFENSE) -->
   <main id="mainGameArena">
-    <!-- LEFT: PRONUNCIATION & QUESTION CARD STUDIO -->
+    <!-- LEFT: PICTURE & AUDIO MULTIPLE-CHOICE STUDIO -->
     <aside class="pronounce-panel">
       <div class="flex items-center justify-between gap-2">
-        <span id="cardPromptType" style="background:#fef3c7;border:2px solid #f59e0b;color:#92400e;font-size:0.75rem;font-weight:900;padding:3px 10px;border-radius:999px;">
-          🗣️ Say the Word
+        <span id="cardPromptType" style="background:#fef3c7;border:2px solid #f59e0b;color:#92400e;font-size:0.74rem;font-weight:900;padding:3px 10px;border-radius:999px;">
+          🖼️ Pick the Correct Word
         </span>
         <span id="cardRewardBadge" style="background:#dcfce7;border:2px solid #22c55e;color:#166534;font-size:0.78rem;font-weight:900;padding:3px 10px;border-radius:999px;">
           +50 ☀️
         </span>
       </div>
 
-      <!-- Topic Deck Selector -->
-      <div>
-        <label style="font-size:0.72rem;font-weight:900;color:#78350f;text-transform:uppercase;">Topic / Question Deck</label>
-        <select id="topicSelect" class="input-field" style="margin-top:3px;">
-          <option value="traits" selected>🌟 Character Traits (8 Pictures)</option>
-          <option value="custom">📝 My Custom Questions</option>
-          <option value="mix">🌈 Mix: Traits + Custom</option>
-        </select>
-      </div>
-
-      <!-- Flashcard Visual & Prompt -->
-      <div class="flashcard-stage">
-        <div id="cardVisualEmoji" class="hidden" style="font-size:4.2rem;line-height:1;">😎</div>
-        <img id="cardVisualImage" src="https://daniellacnunez-collab.github.io/ohnozombies/cool.JPG" alt="Card visual" style="max-height:130px;max-width:100%;border-radius:12px;object-fit:contain;border:2px solid #fde68a;background:#fff;" />
-        <div id="cardPromptText" style="font-size:1.35rem;font-weight:900;color:#0f172a;line-height:1.25;">Cool</div>
-        <div id="cardHintText" style="font-size:0.78rem;font-weight:700;color:#64748b;">💡 Hint: Starts with C - O - O</div>
-      </div>
-
-      <!-- Speech Feedback Banner -->
-      <div id="speechFeedbackBanner" style="background:#f1f5f9;color:#334155;border-radius:12px;padding:8px 10px;font-size:0.82rem;font-weight:800;text-align:center;">
-        🎤 Click "Speak Answer" or type below to earn Suns!
-      </div>
-
-      <!-- Primary Microphone & Audio Buttons -->
+      <!-- Topic Deck & Activity Mode Selectors -->
       <div class="grid grid-cols-2 gap-2">
-        <button id="btnSpeakMic" type="button" class="game-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;padding:11px 10px;font-size:0.9rem;">
-          <span>🎤</span><span>Speak Answer</span>
-        </button>
-        <button id="btnHearWord" type="button" class="game-btn" style="background:#0284c7;color:#fff;padding:11px 10px;font-size:0.9rem;">
-          <span>🔊</span><span>Hear Word</span>
-        </button>
+        <div>
+          <label style="font-size:0.68rem;font-weight:900;color:#78350f;text-transform:uppercase;">Topic Deck</label>
+          <select id="topicSelect" class="input-field" style="margin-top:2px;font-size:0.8rem;padding:6px 8px;">
+            <option value="traits" selected>🌟 Character Traits</option>
+            <option value="custom">📝 Custom Cards</option>
+            <option value="mix">🌈 Mix All</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.68rem;font-weight:900;color:#78350f;text-transform:uppercase;">Question Mode</label>
+          <select id="quizModeSelect" class="input-field" style="margin-top:2px;font-size:0.8rem;padding:6px 8px;">
+            <option value="mix" selected>🎲 Mix All 3 Modes</option>
+            <option value="pic_to_word">🖼️ Pic → Pick Word</option>
+            <option value="audio_to_pic">🔊 Audio → Pick Pic</option>
+            <option value="pic_to_audio">🎧 Pic → Play Audio</option>
+          </select>
+        </div>
       </div>
 
-      <!-- Typing Fallback Input -->
-      <div class="flex items-center gap-2">
-        <input id="typedAnswerInput" type="text" class="input-field" placeholder="Or type answer here..." />
-        <button id="btnSubmitTyped" type="button" class="game-btn" style="background:#16a34a;color:#fff;padding:9px 14px;font-size:0.85rem;">
-          Check
+      <!-- Flashcard Visual & Prompt Stage -->
+      <div class="flashcard-stage">
+        <div id="cardVisualEmoji" class="hidden" style="font-size:3.8rem;line-height:1;">😎</div>
+        <img id="cardVisualImage" src="https://daniellacnunez-collab.github.io/ohnozombies/cool.JPG" alt="Card visual" style="max-height:115px;max-width:100%;border-radius:12px;object-fit:contain;border:2px solid #fde68a;background:#fff;" />
+        <button id="btnPlayPromptAudio" type="button" class="game-btn hidden" style="background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;padding:12px 18px;font-size:1rem;border-color:#bae6fd;">
+          <span>🔊</span><span>Play Audio Clue</span>
         </button>
+        <div id="cardPromptText" style="font-size:1.05rem;font-weight:900;color:#0f172a;line-height:1.25;">Which word matches this picture?</div>
+        <div id="cardHintText" style="font-size:0.75rem;font-weight:700;color:#64748b;">💡 Tap the matching answer below!</div>
+      </div>
+
+      <!-- Multiple-Choice Options Area (Words, Pictures, or Playable Audio Choices) -->
+      <div id="quizOptionsContainer" class="quiz-options-grid"></div>
+
+      <!-- Feedback Banner -->
+      <div id="speechFeedbackBanner" style="background:#f1f5f9;color:#334155;border-radius:12px;padding:7px 10px;font-size:0.8rem;font-weight:800;text-align:center;">
+        👆 Tap the right choice above to earn Suns ☀️!
       </div>
 
       <!-- Teacher Override & Skip Controls -->
@@ -557,7 +627,7 @@
           ✅ Teacher: Mark Correct
         </button>
         <button id="btnSkipCard" type="button" class="game-btn" style="background:#e2e8f0;color:#334155;padding:7px 11px;font-size:0.76rem;box-shadow:none;">
-          ⏭️ Skip
+          ⏭️ Next Question
         </button>
       </div>
     </aside>
@@ -612,16 +682,19 @@
 
         <!-- Start Overlay -->
         <div id="startOverlay" style="position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px;text-align:center;color:#fff;z-index:15;">
-          <div style="pointer-events:auto;background:rgba(6,78,59,0.92);border:3px solid #fde047;border-radius:18px;padding:10px 20px;max-width:560px;box-shadow:0 10px 25px rgba(0,0,0,0.45);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;">
-            <div style="text-align:left;flex:1;min-width:220px;">
-              <h2 style="font-size:1.15rem;font-weight:900;color:#fde047;margin-bottom:2px;">🏡 Defend the Family House!</h2>
-              <p style="font-size:0.78rem;color:#d1fae5;line-height:1.3;margin:0;">
-                Say words or answer questions to earn <strong>Suns ☀️</strong> and plant defenses!
-              </p>
+          <div style="pointer-events:auto;background:rgba(6,78,59,0.95);border:3px solid #fde047;border-radius:18px;padding:12px 18px;max-width:640px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,0.45);display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+              <div style="text-align:left;flex:1;min-width:210px;">
+            <h2 style="font-size:1.15rem;font-weight:900;color:#fde047;margin-bottom:2px;">🏡 Choose Who Is In the House!</h2>
+            <p style="font-size:0.78rem;color:#d1fae5;line-height:1.3;margin:0;">
+              Pick the family members to protect, then match pictures &amp; audio to earn <strong>Suns ☀️</strong>!
+            </p>
+          </div>
+              <button id="btnStartGame" class="game-btn" style="background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;padding:10px 20px;font-size:0.95rem;border-color:#bbf7d0;white-space:nowrap;">
+                ▶️ Start Defending!
+              </button>
             </div>
-            <button id="btnStartGame" class="game-btn" style="background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;padding:10px 20px;font-size:0.95rem;border-color:#bbf7d0;white-space:nowrap;">
-              ▶️ Start Defending!
-            </button>
+            <div id="startFamilySelectorGrid" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding-top:6px;border-top:1.5px dashed rgba(253,224,71,0.45);"></div>
           </div>
         </div>
 
@@ -631,15 +704,15 @@
           <button id="btnResumeOverlay" class="game-btn" style="background:#10b981;color:#fff;padding:10px 24px;font-size:1rem;">▶️ Resume Game</button>
         </div>
 
-        <!-- Student Waiting for Teacher Overlay -->
-        <div id="studentWaitingOverlay" class="hidden" style="position:absolute;inset:0;background:rgba(6,78,59,0.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;color:#fff;z-index:18;">
-          <div style="font-size:3.5rem;margin-bottom:8px;">⏳🏫</div>
-          <h2 id="studentWaitingTitle" style="font-size:1.6rem;font-weight:900;color:#fde047;margin-bottom:6px;">Connected to Classroom!</h2>
-          <p id="studentWaitingSub" style="max-width:420px;font-size:0.95rem;color:#d1fae5;line-height:1.5;font-weight:700;">
-            Please wait for your teacher to click <strong>Play</strong> to begin defending your house!
-          </p>
-          <div style="margin-top:14px;background:rgba(0,0,0,0.35);border:2px solid #34d399;border-radius:999px;padding:6px 16px;font-size:0.82rem;font-weight:800;color:#a7f3d0;">
-            Room: <span id="studentWaitingRoomCode">-----</span> • Player: <span id="studentWaitingName">Student</span>
+        <!-- Student Sun Prep Phase Banner (Non-blocking so students can earn Suns before Teacher clicks Start!) -->
+        <div id="studentPrepBanner" class="hidden" style="position:absolute;top:12px;left:12px;right:12px;pointer-events:none;display:flex;justify-content:center;z-index:17;">
+          <div style="background:rgba(6,78,59,0.94);border:3px solid #fde047;border-radius:18px;padding:10px 18px;max-width:560px;box-shadow:0 10px 24px rgba(0,0,0,0.45);text-align:center;color:#fff;">
+            <div style="font-size:1.05rem;font-weight:900;color:#fde047;">
+              ☀️ Sun Prep Time! Answer Picture &amp; Audio Questions to Stock Up on Suns!
+            </div>
+            <div style="font-size:0.8rem;color:#d1fae5;font-weight:700;margin-top:2px;">
+              Room <strong id="studentWaitingRoomCode">-----</strong> • <strong id="studentWaitingName">Student</strong> — Zombies attack when your teacher clicks <strong>Start</strong>!
+            </div>
           </div>
         </div>
       </div>
@@ -862,6 +935,28 @@
     </div>
   </div>
 
+  <!-- MODAL 8: CHOOSE FAMILY MEMBERS IN THE HOUSE -->
+  <div id="familyModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:560px;">
+      <div class="flex items-center justify-between" style="border-bottom:2px solid #fde68a;padding-bottom:10px;margin-bottom:12px;">
+        <h3 style="font-size:1.3rem;font-weight:900;color:#451a03;">👨‍👩‍👧‍👦 Who Is In the House?</h3>
+        <button id="btnCloseFamilyModal" style="background:none;border:none;font-size:1.4rem;font-weight:900;cursor:pointer;color:#64748b;">✖</button>
+      </div>
+      <p style="font-size:0.84rem;color:#78350f;font-weight:700;margin-bottom:12px;">
+        Select which family members are inside the house peering out the windows:
+      </p>
+      <div id="modalFamilySelectorGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2" style="margin-bottom:14px;"></div>
+      <div class="flex items-center justify-between gap-2" style="border-top:2px solid #fde68a;padding-top:10px;">
+        <button id="btnSelectAllFamily" type="button" class="game-btn" style="background:#fef3c7;color:#92400e;border-color:#f59e0b;padding:7px 14px;font-size:0.82rem;box-shadow:none;">
+          ✨ Select All
+        </button>
+        <button id="btnSaveFamilyDone" type="button" class="game-btn" style="background:#10b981;color:#fff;padding:8px 18px;font-size:0.88rem;">
+          ✅ Done
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -971,9 +1066,33 @@
       syncInterval: null,
       hostHeartbeatInterval: null,
       broadcastChannel: null,
+      peer: null,
+      hostConnections: {}, // peerId -> DataConnection (Teacher side)
+      studentConn: null,   // DataConnection to Teacher (Student side)
       qrStream: null,
       qrScanTimer: null
     };
+
+    function getPeerHostId(roomCode) {
+      return `ohnozombies-room-${String(roomCode || '').trim().toUpperCase()}`;
+    }
+
+    function destroyClassroomPeer() {
+      try {
+        if (classroom.studentConn) {
+          classroom.studentConn.close();
+          classroom.studentConn = null;
+        }
+        Object.values(classroom.hostConnections || {}).forEach((c) => {
+          try { c.close(); } catch (e) {}
+        });
+        classroom.hostConnections = {};
+        if (classroom.peer) {
+          classroom.peer.destroy();
+          classroom.peer = null;
+        }
+      } catch (e) {}
+    }
 
     function generateRoomCode() {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -1063,6 +1182,77 @@
       if (savedQ) customQuestions = JSON.parse(savedQ);
     } catch (e) {}
 
+    const FAMILY_MEMBER_OPTIONS = [
+      { id: 'mother', label: 'Mother', emoji: '👩', scaredEmoji: '😱' },
+      { id: 'father', label: 'Father', emoji: '👨', scaredEmoji: '😨' },
+      { id: 'brother', label: 'Brother', emoji: '👦', scaredEmoji: '😱' },
+      { id: 'older_sister', label: 'Older Sister', emoji: '👧', scaredEmoji: '😱' },
+      { id: 'older_brother', label: 'Older Brother', emoji: '🧑', scaredEmoji: '😨' },
+      { id: 'younger_sister', label: 'Younger Sister', emoji: '🧒', scaredEmoji: '😭' },
+      { id: 'younger_brother', label: 'Younger Brother', emoji: '👶', scaredEmoji: '😭' },
+      { id: 'grandma', label: 'Grandma', emoji: '👵', scaredEmoji: '😱' },
+      { id: 'grandpa', label: 'Grandpa', emoji: '👴', scaredEmoji: '😨' }
+    ];
+
+    let selectedFamilyIds = ['mother', 'father', 'younger_sister', 'grandma'];
+    try {
+      const savedFam = localStorage.getItem('pvz_selected_family_v1');
+      if (savedFam) {
+        const parsedFam = JSON.parse(savedFam);
+        if (Array.isArray(parsedFam) && parsedFam.length > 0) selectedFamilyIds = parsedFam;
+      }
+    } catch (e) {}
+
+    function toggleFamilyMemberSelection(memberId) {
+      const idx = selectedFamilyIds.indexOf(memberId);
+      if (idx >= 0) {
+        if (selectedFamilyIds.length <= 1) {
+          showToast('🏡 Keep at least 1 family member inside the house!', true);
+          return;
+        }
+        selectedFamilyIds.splice(idx, 1);
+      } else {
+        selectedFamilyIds.push(memberId);
+      }
+      try { localStorage.setItem('pvz_selected_family_v1', JSON.stringify(selectedFamilyIds)); } catch (e) {}
+      renderFamilySelectors();
+    }
+
+    function renderFamilySelectors() {
+      const startGrid = document.getElementById('startFamilySelectorGrid');
+      const modalGrid = document.getElementById('modalFamilySelectorGrid');
+
+      if (startGrid) {
+        startGrid.innerHTML = '';
+        FAMILY_MEMBER_OPTIONS.forEach((m) => {
+          const isSelected = selectedFamilyIds.includes(m.id);
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.style.cssText = isSelected
+            ? 'background:#fde047;color:#451a03;border:2px solid #f59e0b;border-radius:999px;padding:4px 10px;font-size:0.76rem;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 0 #92400e;'
+            : 'background:rgba(255,255,255,0.14);color:#ecfdf5;border:1.5px solid rgba(255,255,255,0.3);border-radius:999px;padding:4px 10px;font-size:0.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;';
+          chip.innerHTML = `<span>${m.emoji}</span><span>${m.label}</span><span>${isSelected ? '✓' : '+'}</span>`;
+          chip.addEventListener('click', () => toggleFamilyMemberSelection(m.id));
+          startGrid.appendChild(chip);
+        });
+      }
+
+      if (modalGrid) {
+        modalGrid.innerHTML = '';
+        FAMILY_MEMBER_OPTIONS.forEach((m) => {
+          const isSelected = selectedFamilyIds.includes(m.id);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.style.cssText = isSelected
+            ? 'background:#dcfce7;color:#065f46;border:2.5px solid #16a34a;border-radius:14px;padding:9px 10px;font-size:0.84rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px;'
+            : 'background:#ffffff;color:#475569;border:2px solid #cbd5e1;border-radius:14px;padding:9px 10px;font-size:0.84rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px;';
+          btn.innerHTML = `<span style="display:flex;align-items:center;gap:6px;"><span style="font-size:1.35rem;">${m.emoji}</span><span>${m.label}</span></span><span>${isSelected ? '✅' : '⬜'}</span>`;
+          btn.addEventListener('click', () => toggleFamilyMemberSelection(m.id));
+          modalGrid.appendChild(btn);
+        });
+      }
+    }
+
     const state = {
       sun: 125,
       wordsMastered: 0,
@@ -1076,6 +1266,9 @@
       skySunTimer: 8000,
       selectedTool: 'peashooter',
       category: 'traits',
+      quizMode: 'mix', // 'mix' | 'pic_to_word' | 'audio_to_pic' | 'pic_to_audio'
+      activeRoundMode: 'pic_to_word',
+      cardLocked: false,
       difficulty: 'medium',
       speedMultiplier: 1,
       started: false,
@@ -1083,14 +1276,14 @@
       gameOver: false,
       victory: false,
       muted: false,
-      currentCard: null,
       cardIndex: 0,
+      currentCard: null,
       grid: Array.from({ length: ROWS }, () => Array(COLS).fill(null)),
       zombies: [],
       projectiles: [],
       suns: [],
       particles: [],
-      lawnmowers: Array.from({ length: ROWS }, (_, r) => ({ row: r, active: true, triggered: false, x: 0 }))
+      lawnmowers: []
     };
 
     const canvas = document.getElementById('gameCanvas');
@@ -1098,73 +1291,59 @@
     const layout = {
       width: 820,
       height: 440,
-      houseWidth: 112,
-      padTop: 14,
-      padBottom: 14,
-      padRight: 16,
-      cellW: 76,
-      cellH: 82
+      houseWidth: 110,
+      padTop: 10,
+      padBottom: 10,
+      padRight: 12,
+      cellW: 78,
+      cellH: 84
     };
 
-    function showToast(msg, isError = false) {
-      let el = document.getElementById('globalToastBanner');
-      if (!el) {
-        el = document.createElement('div');
-        el.id = 'globalToastBanner';
-        document.body.appendChild(el);
-      }
-      el.className = `toast-banner ${isError ? 'error' : ''}`;
-      el.textContent = msg;
-      el.style.display = 'block';
-      clearTimeout(el._hideTimer);
-      el._hideTimer = setTimeout(() => {
-        el.style.display = 'none';
+    let audioCtx = null;
+    function playTone(freq = 440, duration = 0.12, type = 'sine', volume = 0.12) {
+      if (state.muted) return;
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    let toastTimer = null;
+    function showToast(message, isError = false) {
+      document.querySelectorAll('.toast-banner').forEach((el) => el.remove());
+      const banner = document.createElement('div');
+      banner.className = `toast-banner ${isError ? 'error' : ''}`;
+      banner.textContent = message;
+      document.body.appendChild(banner);
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        banner.remove();
       }, 3400);
     }
 
-    function playTone(freq = 440, duration = 0.12, type = 'sine', gainVal = 0.12) {
-      if (state.muted) return;
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        if (!window._pvzAudioCtx) window._pvzAudioCtx = new AudioCtx();
-        const actx = window._pvzAudioCtx;
-        if (actx.state === 'suspended') actx.resume();
-        const osc = actx.createOscillator();
-        const gain = actx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(gainVal, actx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(actx.destination);
-        osc.start();
-        osc.stop(actx.currentTime + duration);
-      } catch (e) {}
-    }
-
-    function getJoinUrl(roomCode = '', forceJoinPage = true) {
-      let base = window.location.href.split('?')[0].split('#')[0];
-      if ((!base || base.startsWith('about:') || base.startsWith('blob:')) && window.parent && window.parent !== window) {
-        try {
-          base = window.parent.location.href.split('?')[0].split('#')[0];
-        } catch (e) {}
-      }
+    function getJoinUrl(roomCode = '', joinPageOnly = false) {
+      const base = window.location.origin && window.location.origin !== 'null'
+        ? `${window.location.origin}${window.location.pathname}`
+        : window.location.href.split('?')[0].split('#')[0];
       const params = new URLSearchParams();
-      if (forceJoinPage) params.set('page', 'join');
-      if (roomCode) params.set('room', roomCode);
+      if (joinPageOnly || roomCode) params.set('page', 'join');
+      if (roomCode) params.set('room', String(roomCode).trim().toUpperCase());
       const query = params.toString();
-      return `${base}${query ? '?' + query : ''}#join`;
-    }
-
-    function openStudentJoinPage(prefillCode = '') {
-      classroom.role = 'join_page';
-      applyRoleRestrictions();
-      const joinInp = document.getElementById('inputJoinRoomCode');
-      if (joinInp && prefillCode) joinInp.value = prefillCode.toUpperCase();
-      try {
-        window.history.replaceState(null, '', '#join');
-      } catch (e) {}
+      return query ? `${base}?${query}` : base;
     }
 
     function stopIpadQrScanner() {
@@ -1176,60 +1355,278 @@
         classroom.qrStream.getTracks().forEach((t) => t.stop());
         classroom.qrStream = null;
       }
+      const videoEl = document.getElementById('ipadQrVideo');
+      if (videoEl) videoEl.srcObject = null;
       document.getElementById('ipadQrScannerBox')?.classList.add('hidden');
     }
 
     async function startIpadQrScanner() {
-      const box = document.getElementById('ipadQrScannerBox');
-      const video = document.getElementById('ipadQrVideo');
-      if (!box || !video) return;
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast('📷 Camera not available here — type the 5-letter Room Code above!', true);
+      const scannerBox = document.getElementById('ipadQrScannerBox');
+      const videoEl = document.getElementById('ipadQrVideo');
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !videoEl) {
+        showToast('📷 Camera unavailable — type the 5-letter Room Code above!', true);
         return;
       }
-
       try {
+        stopIpadQrScanner();
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' } },
           audio: false
         });
         classroom.qrStream = stream;
-        video.srcObject = stream;
-        await video.play();
-        box.classList.remove('hidden');
+        videoEl.srcObject = stream;
+        await videoEl.play();
+        scannerBox?.classList.remove('hidden');
 
         if ('BarcodeDetector' in window) {
           const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
           classroom.qrScanTimer = setInterval(async () => {
-            if (!video || video.readyState < 2) return;
             try {
-              const codes = await detector.detect(video);
+              const codes = await detector.detect(videoEl);
               if (codes && codes.length > 0 && codes[0].rawValue) {
-                const raw = codes[0].rawValue;
-                let extractedCode = '';
+                const scanned = codes[0].rawValue;
+                let extractedCode = scanned.trim().toUpperCase();
                 try {
-                  const u = new URL(raw);
-                  extractedCode = u.searchParams.get('room') || '';
-                } catch (e) {
-                  const m = raw.match(/[A-Z0-9]{4,8}/i);
-                  if (m) extractedCode = m[0];
-                }
-                if (extractedCode) {
-                  const inp = document.getElementById('inputJoinRoomCode');
-                  if (inp) inp.value = extractedCode.toUpperCase();
-                  stopIpadQrScanner();
-                  playTone(720, 0.14, 'triangle', 0.16);
-                  showToast(`✅ Scanned Room Code: ${extractedCode.toUpperCase()}!`);
-                }
+                  const u = new URL(scanned);
+                  const r = u.searchParams.get('room');
+                  if (r) extractedCode = r.toUpperCase();
+                } catch (e) {}
+                const codeInput = document.getElementById('inputJoinRoomCode');
+                if (codeInput) codeInput.value = extractedCode.slice(0, 8);
+                stopIpadQrScanner();
+                playTone(720, 0.14, 'triangle', 0.16);
+                showToast(`✅ Scanned Room Code: ${extractedCode}!`);
               }
             } catch (e) {}
           }, 350);
         } else {
-          showToast('📱 Tip: You can also point the iPad Camera app at the QR code to open the link!', false);
+          showToast('📷 Point camera or enter the 5-letter Room Code manually.');
         }
       } catch (err) {
-        showToast('📷 Camera permission denied — enter the 5-letter Room Code above!', true);
+        showToast('📷 Could not access camera — please type the Room Code manually.', true);
+      }
+    }
+
+    function openStudentJoinPage(prefillRoom = '') {
+      classroom.role = 'join_page';
+      applyRoleRestrictions();
+      const codeInput = document.getElementById('inputJoinRoomCode');
+      if (codeInput && prefillRoom) {
+        codeInput.value = String(prefillRoom).trim().toUpperCase();
+      }
+      setTimeout(() => {
+        const nameInput = document.getElementById('inputStudentName');
+        if (nameInput) nameInput.focus();
+      }, 60);
+    }
+
+    function speakTextOutLoud(textToSpeak) {
+      if (!textToSpeak || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(String(textToSpeak));
+      utter.rate = 0.92;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function buildQuizChoices(correctCard, deck) {
+      const pool = deck.filter((c) => c !== correctCard && normalizePhrase(c.answer) !== normalizePhrase(correctCard.answer));
+      // Shuffle distractors
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      const choices = [correctCard, ...pool.slice(0, 3)];
+      // Shuffle final 4 choices
+      for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+      }
+      return choices;
+    }
+
+    function renderQuizOptions(choices, mode) {
+      const container = document.getElementById('quizOptionsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      container.className = mode === 'pic_to_audio' ? 'flex flex-col gap-2' : 'quiz-options-grid';
+
+      const labels = ['A', 'B', 'C', 'D'];
+
+      choices.forEach((choiceCard, idx) => {
+        const isCorrect = choiceCard === state.currentCard || normalizePhrase(choiceCard.answer) === normalizePhrase(state.currentCard.answer);
+        const spokenWord = choiceCard.answer || choiceCard.display;
+        const displayLabel = choiceCard.type === 'qa' ? choiceCard.answer : choiceCard.display;
+
+        if (mode === 'pic_to_word') {
+          // Mode 1: Picture shown above -> Student taps the matching word button
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'quiz-option-btn';
+          btn.innerHTML = `<span style="font-size:0.95rem;">${displayLabel}</span>`;
+          btn.addEventListener('click', () => evaluateQuizChoice(isCorrect, btn, displayLabel));
+          container.appendChild(btn);
+        } else if (mode === 'audio_to_pic') {
+          // Mode 2: Audio played above -> Student taps the matching picture card
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'quiz-option-btn';
+          btn.style.minHeight = '78px';
+          if (choiceCard.image) {
+            btn.innerHTML = `
+              <img src="${choiceCard.image}" alt="Option ${labels[idx]}" style="width:54px;height:54px;object-fit:contain;border-radius:8px;background:#fff;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+              <span style="display:none;font-size:2.1rem;line-height:1;">${choiceCard.emoji || '🌟'}</span>
+            `;
+          } else {
+            btn.innerHTML = `<span style="font-size:2.2rem;line-height:1;">${choiceCard.emoji || '🌟'}</span>`;
+          }
+          btn.addEventListener('click', () => evaluateQuizChoice(isCorrect, btn, displayLabel));
+          container.appendChild(btn);
+        } else {
+          // Mode 3: Picture shown above -> Student clicks to play each audio option & picks the match
+          const row = document.createElement('div');
+          row.className = 'audio-choice-row';
+          row.innerHTML = `
+            <button type="button" class="game-btn play-opt-audio" style="background:#0284c7;color:#fff;padding:6px 12px;font-size:0.82rem;flex:1;">
+              <span>🔊</span><span>Play Sound ${labels[idx]}</span>
+            </button>
+            <button type="button" class="game-btn pick-opt-audio" style="background:#f59e0b;color:#451a03;padding:6px 12px;font-size:0.82rem;border-color:#fde047;">
+              <span>✅</span><span>Pick ${labels[idx]}</span>
+            </button>
+          `;
+          row.querySelector('.play-opt-audio').addEventListener('click', () => {
+            speakTextOutLoud(spokenWord);
+          });
+          row.querySelector('.pick-opt-audio').addEventListener('click', () => {
+            evaluateQuizChoice(isCorrect, row, displayLabel);
+          });
+          container.appendChild(row);
+        }
+      });
+    }
+
+    function evaluateQuizChoice(isCorrect, elementEl, chosenLabel) {
+      if (!state.currentCard || state.cardLocked) return;
+      const feedbackEl = document.getElementById('speechFeedbackBanner');
+
+      if (isCorrect) {
+        state.cardLocked = true;
+        if (elementEl) elementEl.classList.add('correct-flash');
+        const reward = state.currentCard.sunReward || 50;
+        state.sun += reward;
+        state.wordsMastered += 1;
+        state.streak += 1;
+        playTone(587, 0.1, 'triangle', 0.15);
+        setTimeout(() => playTone(880, 0.16, 'triangle', 0.15), 90);
+        spawnParticles(layout.width * 0.5, layout.height * 0.35, '#facc15', 14);
+        if (feedbackEl) {
+          feedbackEl.style.background = '#dcfce7';
+          feedbackEl.style.color = '#166534';
+          feedbackEl.textContent = `🎉 Correct! "${chosenLabel}" earned +${reward} Suns ☀️!`;
+        }
+        updateSunUI();
+        setTimeout(() => {
+          state.cardLocked = false;
+          loadNextCard(true);
+        }, 650);
+      } else {
+        state.streak = 0;
+        if (elementEl) {
+          elementEl.classList.add('wrong-flash');
+          setTimeout(() => elementEl.classList.remove('wrong-flash'), 550);
+        }
+        playTone(210, 0.14, 'sawtooth', 0.09);
+        if (feedbackEl) {
+          feedbackEl.style.background = '#fee2e2';
+          feedbackEl.style.color = '#991b1b';
+          feedbackEl.textContent = `❌ Not quite — try another choice!`;
+        }
+        updateSunUI();
+      }
+    }
+
+    function loadNextCard(advance = true) {
+      const deck = getActiveDeck();
+      if (!deck || deck.length === 0) return;
+
+      state.cardLocked = false;
+      if (advance) {
+        state.cardIndex = (state.cardIndex + 1) % deck.length;
+      } else if (state.cardIndex >= deck.length || state.cardIndex < 0) {
+        state.cardIndex = 0;
+      }
+
+      const card = deck[state.cardIndex];
+      state.currentCard = card;
+
+      // Choose which of the 3 activity modes to present
+      const availableModes = ['pic_to_word', 'audio_to_pic', 'pic_to_audio'];
+      let mode = state.quizMode;
+      if (!availableModes.includes(mode)) {
+        mode = availableModes[(state.cardIndex + state.wordsMastered) % availableModes.length];
+      }
+      state.activeRoundMode = mode;
+
+      const typeBadge = document.getElementById('cardPromptType');
+      const rewardBadge = document.getElementById('cardRewardBadge');
+      const emojiEl = document.getElementById('cardVisualEmoji');
+      const imgEl = document.getElementById('cardVisualImage');
+      const audioPromptBtn = document.getElementById('btnPlayPromptAudio');
+      const promptEl = document.getElementById('cardPromptText');
+      const hintEl = document.getElementById('cardHintText');
+      const feedbackEl = document.getElementById('speechFeedbackBanner');
+
+      if (rewardBadge) {
+        rewardBadge.textContent = `+${card.sunReward || 50} ☀️`;
+      }
+
+      // Reset visual stage elements
+      emojiEl?.classList.add('hidden');
+      imgEl?.classList.add('hidden');
+      audioPromptBtn?.classList.add('hidden');
+
+      const showVisualPicture = () => {
+        if (card.image) {
+          if (emojiEl) emojiEl.textContent = card.emoji || '🌟';
+          if (imgEl) {
+            imgEl.onerror = () => {
+              imgEl.classList.add('hidden');
+              if (emojiEl) emojiEl.classList.remove('hidden');
+            };
+            imgEl.src = card.image;
+            imgEl.classList.remove('hidden');
+          }
+        } else if (emojiEl) {
+          emojiEl.textContent = card.emoji || '🌟';
+          emojiEl.classList.remove('hidden');
+        }
+      };
+
+      if (mode === 'pic_to_word') {
+        if (typeBadge) typeBadge.textContent = '🖼️ Picture → Pick Word';
+        showVisualPicture();
+        if (promptEl) promptEl.textContent = card.type === 'qa' ? card.display : 'Which word matches this picture?';
+        if (hintEl) hintEl.textContent = '👆 Tap the matching word below!';
+      } else if (mode === 'audio_to_pic') {
+        if (typeBadge) typeBadge.textContent = '🔊 Audio → Pick Picture';
+        audioPromptBtn?.classList.remove('hidden');
+        if (promptEl) promptEl.textContent = card.type === 'qa' ? card.display : 'Listen to the word & tap the matching picture!';
+        if (hintEl) hintEl.textContent = '🎧 Click "Play Audio Clue" anytime to replay';
+        // Automatically play the audio prompt for the student
+        setTimeout(() => speakTextOutLoud(card.type === 'qa' ? card.display : (card.answer || card.display)), 180);
+      } else {
+        if (typeBadge) typeBadge.textContent = '🎧 Picture → Play Audio';
+        showVisualPicture();
+        if (promptEl) promptEl.textContent = card.type === 'qa' ? card.display : 'Listen to Sounds A–D & pick the match!';
+        if (hintEl) hintEl.textContent = '🔊 Click Play Sound, then click ✅ Pick';
+      }
+
+      const choices = buildQuizChoices(card, deck);
+      renderQuizOptions(choices, mode);
+
+      if (feedbackEl && !advance) {
+        feedbackEl.style.background = '#f1f5f9';
+        feedbackEl.style.color = '#334155';
+        feedbackEl.textContent = '👆 Tap the right choice above to earn Suns ☀️!';
       }
     }
 
@@ -1412,13 +1809,12 @@
       });
       const panicLevel = closestRatio < 0.25 ? 2 : closestRatio < 0.55 ? 1 : 0;
 
-      // Windows with scared family members & front door on middle row
-      const familyEmojis = panicLevel === 2
-        ? ['😱', '😨', '🙀', '😱']
-        : panicLevel === 1
-          ? ['😟', '😰', '🐶', '😨']
-          : ['👀', '🙂', '🐶', '👀'];
-      let famIdx = 0;
+      // Chosen family members inside the house windows
+      const activeFamily = FAMILY_MEMBER_OPTIONS.filter((m) => selectedFamilyIds.includes(m.id));
+      const roster = activeFamily.length > 0 ? activeFamily : [FAMILY_MEMBER_OPTIONS[0]];
+      const windowRows = [0, 1, 3, 4];
+      const perWindow = Math.max(1, Math.ceil(roster.length / windowRows.length));
+      let memberCursor = 0;
 
       for (let r = 0; r < ROWS; r++) {
         const cy = layout.padTop + (r + 0.5) * layout.cellH;
@@ -1439,21 +1835,46 @@
           ctx.textBaseline = 'middle';
           ctx.fillText(houseIcon, cx, cy);
         } else {
-          // Glowing Window with Family Member
-          const ww = Math.min(46, hw * 0.5);
-          const wh = Math.min(48, layout.cellH * 0.6);
-          ctx.fillStyle = panicLevel === 2 ? '#fecaca' : '#fef08a';
+          // Glowing Window with Chosen Family Member(s)
+          const ww = Math.min(54, hw * 0.62);
+          const wh = Math.min(52, layout.cellH * 0.64);
+          ctx.fillStyle = panicLevel === 2 ? '#fecaca' : panicLevel === 1 ? '#fde68a' : '#fef08a';
           ctx.fillRect(cx - ww / 2, cy - wh / 2, ww, wh);
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 2.5;
           ctx.strokeRect(cx - ww / 2, cy - wh / 2, ww, wh);
 
-          const face = familyEmojis[famIdx % familyEmojis.length];
-          famIdx++;
-          ctx.font = `${Math.round(Math.min(ww, wh) * 0.66)}px sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(face, cx, cy + 1);
+          const group = [];
+          for (let k = 0; k < perWindow && memberCursor < roster.length; k++) {
+            group.push(roster[memberCursor++]);
+          }
+
+          if (group.length > 0) {
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (group.length === 1) {
+              const m = group[0];
+              const face = panicLevel === 2 ? m.scaredEmoji : m.emoji;
+              ctx.font = `${Math.round(Math.min(ww, wh) * 0.58)}px sans-serif`;
+              ctx.fillText(face, cx, cy - 3);
+              ctx.fillStyle = '#451a03';
+              ctx.font = `900 ${Math.max(8, Math.round(ww * 0.16))}px Nunito, sans-serif`;
+              ctx.fillText(m.label, cx, cy + wh * 0.36);
+            } else {
+              const slotW = ww / group.length;
+              const fSize = Math.max(12, Math.round(Math.min(slotW * 0.85, wh * 0.46)));
+              ctx.font = `${fSize}px sans-serif`;
+              group.forEach((m, gi) => {
+                const mx = cx - ww / 2 + slotW * (gi + 0.5);
+                const face = panicLevel === 2 ? m.scaredEmoji : m.emoji;
+                ctx.fillText(face, mx, cy - 2);
+              });
+              ctx.fillStyle = '#451a03';
+              ctx.font = `900 ${Math.max(7, Math.round(ww * 0.14))}px Nunito, sans-serif`;
+              const namesTag = group.map((m) => m.label.split(' ').pop()).join('&');
+              ctx.fillText(namesTag, cx, cy + wh * 0.36);
+            }
+          }
         }
       }
     }
@@ -1471,68 +1892,6 @@
         return all.length > 0 ? all : BUILTIN_DECKS.traits;
       }
       return BUILTIN_DECKS.traits;
-    }
-
-    function loadNextCard(advance = true) {
-      const deck = getActiveDeck();
-      if (!deck || deck.length === 0) return;
-
-      if (advance) {
-        state.cardIndex = (state.cardIndex + 1) % deck.length;
-      } else if (state.cardIndex >= deck.length || state.cardIndex < 0) {
-        state.cardIndex = 0;
-      }
-
-      const card = deck[state.cardIndex];
-      state.currentCard = card;
-
-      const typeBadge = document.getElementById('cardPromptType');
-      const rewardBadge = document.getElementById('cardRewardBadge');
-      const emojiEl = document.getElementById('cardVisualEmoji');
-      const imgEl = document.getElementById('cardVisualImage');
-      const promptEl = document.getElementById('cardPromptText');
-      const hintEl = document.getElementById('cardHintText');
-      const feedbackEl = document.getElementById('speechFeedbackBanner');
-
-      if (typeBadge) {
-        typeBadge.textContent = card.type === 'qa' ? '❓ Answer the Question' : '🗣️ Say the Word';
-      }
-      if (rewardBadge) {
-        rewardBadge.textContent = `+${card.sunReward || 50} ☀️`;
-      }
-      if (card.image) {
-        if (emojiEl) {
-          emojiEl.textContent = card.emoji || '🌟';
-          emojiEl.classList.add('hidden');
-        }
-        if (imgEl) {
-          imgEl.onerror = () => {
-            imgEl.classList.add('hidden');
-            if (emojiEl) emojiEl.classList.remove('hidden');
-          };
-          imgEl.src = card.image;
-          imgEl.classList.remove('hidden');
-        }
-      } else {
-        if (imgEl) {
-          imgEl.src = '';
-          imgEl.classList.add('hidden');
-        }
-        if (emojiEl) {
-          emojiEl.textContent = card.emoji || '🌟';
-          emojiEl.classList.remove('hidden');
-        }
-      }
-      if (promptEl) promptEl.textContent = card.display || '';
-      if (hintEl) {
-        const autoHint = card.answer ? `Starts with ${card.answer.slice(0, 3).toUpperCase().split('').join(' - ')}` : '';
-        hintEl.textContent = `💡 Hint: ${card.hint || autoHint}`;
-      }
-      if (feedbackEl && !advance) {
-        feedbackEl.style.background = '#f1f5f9';
-        feedbackEl.style.color = '#334155';
-        feedbackEl.textContent = '🎤 Click "Speak Answer" or type below to earn Suns!';
-      }
     }
 
     function applyTeacherDeckPayload(roomData) {
@@ -1763,11 +2122,11 @@
       if (titleEl) titleEl.textContent = won ? '🏆 House Protected!' : '🧟 Oh No! Zombies Reached the House!';
       if (msgEl) {
         msgEl.textContent = won
-          ? 'Amazing pronunciation skills! You defended the family house through every wave!'
-          : 'Great effort! Practice speaking the words clearly to earn more Suns and plant stronger defenses.';
+          ? 'Amazing job! You solved the picture & audio challenges and defended the family house through every wave!'
+          : 'Great effort! Answer more picture & audio challenges to earn Suns and plant stronger defenses.';
       }
       if (statsEl) {
-        statsEl.textContent = `🗣️ Words Mastered: ${state.wordsMastered}  •  🌊 Wave Reached: ${state.wave}`;
+        statsEl.textContent = `✅ Cards Solved: ${state.wordsMastered}  •  🌊 Wave Reached: ${state.wave}`;
       }
       modal?.classList.remove('hidden');
       playTone(won ? 660 : 180, 0.3, won ? 'triangle' : 'sawtooth', 0.16);
@@ -2110,8 +2469,8 @@
       });
       ctx.globalAlpha = 1;
 
-      // Attract-mode preview zombies shambling on the lawn before the game starts
-      if (!state.started) {
+      // Attract-mode preview zombies shambling on the lawn before the game starts (hidden during Student Sun Prep Phase)
+      if (!state.started && classroom.role !== 'student') {
         drawAttractModeZombies();
       }
     }
@@ -2192,8 +2551,8 @@
         showToast('🌱 That lawn square already has a plant!', true);
         return;
       }
-      if (state.sun < cfg.cost) {
-        showToast(`☀️ Need ${cfg.cost} Suns! Say a word to earn more.`, true);
+      if (cfg && cfg.cost && state.sun < cfg.cost) {
+        showToast(`☀️ Need ${cfg.cost} Suns! Answer a card to earn more.`, true);
         playTone(200, 0.12, 'sawtooth', 0.08);
         return;
       }
@@ -2221,61 +2580,14 @@
     }
 
     /*************************************************************************
-     * 3. SPEECH RECOGNITION & TEXT-TO-SPEECH CONTROLS
+     * 3. TEXT-TO-SPEECH AUDIO HELPER
      *************************************************************************/
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    let isListening = false;
-
-    function setupSpeechRecognition() {
-      if (!SpeechRecognitionAPI) return;
-      recognition = new SpeechRecognitionAPI();
-      recognition.lang = 'en-US';
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 5;
-
-      recognition.onstart = () => {
-        isListening = true;
-        const micBtn = document.getElementById('btnSpeakMic');
-        if (micBtn) micBtn.innerHTML = '<span>🔴</span><span>Listening...</span>';
-      };
-
-      recognition.onresult = (event) => {
-        const lastIdx = event.results.length - 1;
-        const result = event.results[lastIdx];
-        let handled = false;
-        for (let i = 0; i < result.length; i++) {
-          const transcript = result[i].transcript;
-          if (handleAnswerSubmission(transcript)) {
-            handled = true;
-            try { recognition.stop(); } catch (e) {}
-            break;
-          }
-        }
-        if (!handled && result.isFinal && result[0]) {
-          handleAnswerSubmission(result[0].transcript);
-        }
-      };
-
-      recognition.onerror = () => {
-        isListening = false;
-        const micBtn = document.getElementById('btnSpeakMic');
-        if (micBtn) micBtn.innerHTML = '<span>🎤</span><span>Speak Answer</span>';
-      };
-
-      recognition.onend = () => {
-        isListening = false;
-        const micBtn = document.getElementById('btnSpeakMic');
-        if (micBtn) micBtn.innerHTML = '<span>🎤</span><span>Speak Answer</span>';
-      };
-    }
-
     function speakPromptOutLoud() {
-      if (!state.currentCard || !('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(state.currentCard.display);
-      utter.rate = 0.92;
-      window.speechSynthesis.speak(utter);
+      if (!state.currentCard) return;
+      const textToRead = state.currentCard.type === 'qa'
+        ? state.currentCard.display
+        : (state.currentCard.answer || state.currentCard.display);
+      speakTextOutLoud(textToRead);
     }
 
     /*************************************************************************
@@ -2356,6 +2668,7 @@
         studentId: classroom.studentId,
         roomCode: classroom.roomCode,
         name: classroom.studentName,
+        status: classroom.sessionStatus,
         sun: state.sun,
         wordsMastered: state.wordsMastered,
         wave: state.wave,
@@ -2439,12 +2752,19 @@
       gridEl.innerHTML = '';
       list.forEach((stu) => {
         const inDanger = (stu.zombies || []).some((z) => z.xr < 0.25);
+        const isWaiting = classroom.sessionStatus !== 'playing';
+        const statusPill = isWaiting
+          ? `<span style="font-size:0.7rem;font-weight:900;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;border:1px solid #f59e0b;">☀️ Earning Suns</span>`
+          : `<span style="font-size:0.7rem;font-weight:900;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:999px;border:1px solid #93c5fd;">▶️ Defending!</span>`;
         const card = document.createElement('div');
         card.className = `student-lawn-card ${inDanger ? 'danger' : ''}`;
         card.innerHTML = `
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between gap-1 flex-wrap">
             <strong style="font-size:1rem;color:#0f172a;">🎓 ${stu.name}</strong>
-            <span style="font-size:0.78rem;font-weight:900;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;">☀️ ${stu.sun} • 🗣️ ${stu.wordsMastered}</span>
+            <div class="flex items-center gap-1">
+              ${statusPill}
+              <span style="font-size:0.78rem;font-weight:900;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;">☀️ ${stu.sun} • 🗣️ ${stu.wordsMastered}</span>
+            </div>
           </div>
           <canvas width="280" height="145" style="width:100%;height:auto;border-radius:10px;border:2px solid #78350f;"></canvas>
           <div class="flex items-center justify-between" style="font-size:0.76rem;font-weight:800;color:#475569;">
@@ -2499,23 +2819,81 @@
       renderHighScanabilityQr(document.getElementById('teacherInlineQrContainer'), urlText, 168);
       renderHighScanabilityQr(document.getElementById('bigQrContainer'), urlText, 280);
 
+      // Start Cross-Device PeerJS Host so iPads scanning the QR code on external hosting connect live
+      destroyClassroomPeer();
+      let peerReady = false;
+      if (typeof Peer !== 'undefined') {
+        try {
+          const peerHost = new Peer(getPeerHostId(classroom.roomCode), { debug: 0 });
+          classroom.peer = peerHost;
+          peerHost.on('open', () => {
+            peerReady = true;
+            if (syncBadge) {
+              syncBadge.textContent = '🌐 Live Multi-Device Classroom Ready';
+            }
+          });
+          peerHost.on('connection', (conn) => {
+            classroom.hostConnections[conn.peer] = conn;
+            const sendWelcomeState = () => {
+              try {
+                conn.send({
+                  type: 'room_status',
+                  status: classroom.sessionStatus,
+                  maxWaves: classroom.maxWaves,
+                  ...buildTeacherRoomDeckFields()
+                });
+              } catch (e) {}
+            };
+            conn.on('open', sendWelcomeState);
+            conn.on('data', (msg) => {
+              if (!msg || typeof msg !== 'object') return;
+              if ((msg.type === 'student_state' || msg.type === 'student_join' || msg.type === 'request_status') && msg.payload) {
+                const isNew = !classroom.studentsMap[msg.payload.studentId];
+                const norm = normalizeStudentRecord(msg.payload);
+                if (norm) {
+                  classroom.studentsMap[norm.studentId] = norm;
+                  renderTeacherStudentCards();
+                  if (isNew) {
+                    playTone(660, 0.12, 'triangle', 0.14);
+                    showToast(`🎓 ${norm.name} joined the classroom!`);
+                  }
+                }
+                sendWelcomeState();
+              }
+            });
+            conn.on('close', () => {
+              delete classroom.hostConnections[conn.peer];
+            });
+          });
+          peerHost.on('error', (err) => {
+            console.warn('PeerJS host notice:', err);
+          });
+        } catch (e) {
+          console.warn('PeerJS unavailable:', e);
+        }
+      }
+
       // Local same-browser BroadcastChannel + periodic heartbeat
       if (classroom.broadcastChannel) classroom.broadcastChannel.close();
       classroom.broadcastChannel = new BroadcastChannel(`pvz_room_${classroom.roomCode}`);
       classroom.broadcastChannel.onmessage = (ev) => {
         const msg = ev.data || {};
         if (msg.type === 'student_state' && msg.payload) {
+          const isNew = !classroom.studentsMap[msg.payload.studentId];
           const norm = normalizeStudentRecord(msg.payload);
           if (norm) {
             classroom.studentsMap[norm.studentId] = norm;
             renderTeacherStudentCards();
+            if (isNew) showToast(`🎓 ${norm.name} joined the classroom!`);
           }
         } else if (msg.type === 'student_join' || msg.type === 'request_status') {
           if (msg.payload) {
+            const isNew = !classroom.studentsMap[msg.payload.studentId];
             const norm = normalizeStudentRecord(msg.payload);
             if (norm) {
               classroom.studentsMap[norm.studentId] = norm;
               renderTeacherStudentCards();
+              if (isNew) showToast(`🎓 ${norm.name} joined the classroom!`);
             }
           }
           classroom.broadcastChannel.postMessage({
@@ -2529,20 +2907,28 @@
 
       if (classroom.hostHeartbeatInterval) clearInterval(classroom.hostHeartbeatInterval);
       classroom.hostHeartbeatInterval = setInterval(() => {
-        if (classroom.role === 'teacher' && classroom.broadcastChannel) {
-          classroom.broadcastChannel.postMessage({
-            type: 'room_status',
-            status: classroom.sessionStatus,
-            maxWaves: classroom.maxWaves,
-            ...buildTeacherRoomDeckFields()
-          });
+        if (classroom.role !== 'teacher') return;
+        const statusMsg = {
+          type: 'room_status',
+          status: classroom.sessionStatus,
+          maxWaves: classroom.maxWaves,
+          ...buildTeacherRoomDeckFields()
+        };
+        if (classroom.broadcastChannel) {
+          classroom.broadcastChannel.postMessage(statusMsg);
         }
-      }, 1500);
+        Object.values(classroom.hostConnections || {}).forEach((conn) => {
+          if (conn && conn.open) {
+            try { conn.send(statusMsg); } catch (e) {}
+          }
+        });
+      }, 1400);
 
       const hasCloud = await initClassroomBackend();
-      if (syncBadge) {
-        syncBadge.textContent = hasCloud ? '☁️ Cloud Live Connected' : '🖥️ Same-Browser Tab Sync';
+      if (syncBadge && !peerReady) {
+        syncBadge.textContent = hasCloud ? '☁️ Cloud Live Connected' : '🌐 Live Classroom Ready';
       }
+      renderTeacherStudentCards();
 
       if (hasCloud && db && firebaseUser) {
         try {
@@ -2597,7 +2983,7 @@
 
       if (newStatus === 'playing') {
         if (statusBadge) {
-          statusBadge.textContent = '▶️ Class Playing Live';
+          statusBadge.textContent = '▶️ Class Defending Live';
           statusBadge.style.background = '#dcfce7';
           statusBadge.style.color = '#166534';
         }
@@ -2613,27 +2999,29 @@
         pauseBtn?.classList.add('hidden');
       }
 
+      const statusMsg = {
+        type: 'room_status',
+        status: newStatus,
+        maxWaves: classroom.maxWaves,
+        ...buildTeacherRoomDeckFields()
+      };
       if (classroom.broadcastChannel) {
-        classroom.broadcastChannel.postMessage({
-          type: 'room_status',
+        classroom.broadcastChannel.postMessage(statusMsg);
+      }
+      Object.values(classroom.hostConnections || {}).forEach((conn) => {
+        if (conn && conn.open) {
+          try { conn.send(statusMsg); } catch (e) {}
+        }
+      });
+      if (db && firebaseUser && classroom.roomCode) {
+        const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', classroom.roomCode);
+        await setDoc(roomRef, {
+          roomCode: classroom.roomCode,
           status: newStatus,
           maxWaves: classroom.maxWaves,
-          ...buildTeacherRoomDeckFields()
-        });
-      }
-      if (db && firebaseUser && classroom.roomCode) {
-        try {
-          const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', classroom.roomCode);
-          await setDoc(roomRef, {
-            roomCode: classroom.roomCode,
-            status: newStatus,
-            maxWaves: classroom.maxWaves,
-            ...buildTeacherRoomDeckFields(),
-            updatedAt: Date.now()
-          }, { merge: true });
-        } catch (e) {
-          console.warn('Room status update error:', e);
-        }
+          ...buildTeacherRoomDeckFields(),
+          updatedAt: Date.now()
+        }, { merge: true }).catch((e) => console.warn('Room status update error:', e));
       }
       showToast(newStatus === 'playing' ? '▶️ Unlocked! Students can now defend their lawns!' : '⏸️ Class paused.');
     }
@@ -2653,6 +3041,45 @@
       classroom.sessionStatus = 'waiting';
       applyRoleRestrictions();
 
+      // Immediately enter Sun Prep Phase so student can solve picture & audio cards & collect Suns before teacher starts the battle!
+      const waitCodeEl = document.getElementById('studentWaitingRoomCode');
+      const waitNameEl = document.getElementById('studentWaitingName');
+      const prepBanner = document.getElementById('studentPrepBanner');
+      if (waitCodeEl) waitCodeEl.textContent = cleanCode;
+      if (waitNameEl) waitNameEl.textContent = cleanName;
+      document.getElementById('startOverlay')?.classList.add('hidden');
+      if (prepBanner) prepBanner.classList.remove('hidden');
+
+      resizeCanvas();
+      state.sun = 125;
+      state.wordsMastered = 0;
+      state.streak = 0;
+      state.wave = 1;
+      state.started = false;
+      state.paused = false;
+      state.gameOver = false;
+      state.victory = false;
+      state.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+      state.zombies = [];
+      state.projectiles = [];
+      state.suns = [];
+      updateSunUI();
+      loadNextCard(false);
+
+      function startStudentBattleKeepingEarnedSuns() {
+        const earnedSunBank = state.sun;
+        const earnedMastered = state.wordsMastered;
+        const earnedStreak = state.streak;
+        const currentIdx = state.cardIndex;
+        resetGame();
+        state.sun = earnedSunBank;
+        state.wordsMastered = earnedMastered;
+        state.streak = earnedStreak;
+        state.cardIndex = currentIdx;
+        updateSunUI();
+        loadNextCard(false);
+      }
+
       function applyTeacherStatus(newStatus, incomingMaxWaves, roomPayload = null) {
         if (roomPayload) {
           applyTeacherDeckPayload(roomPayload);
@@ -2668,25 +3095,22 @@
         const prev = classroom.sessionStatus;
         classroom.sessionStatus = newStatus;
         if (newStatus === 'playing') {
-          document.getElementById('studentWaitingOverlay')?.classList.add('hidden');
+          document.getElementById('studentPrepBanner')?.classList.add('hidden');
           document.getElementById('pauseOverlay')?.classList.add('hidden');
           resizeCanvas();
           if (!state.started) {
-            resetGame();
+            startStudentBattleKeepingEarnedSuns();
           } else {
             state.paused = false;
             loadNextCard(false);
           }
           if (prev !== 'playing') {
-            showToast('🚀 Your teacher started the game! Defend your house!');
+            playTone(660, 0.16, 'triangle', 0.16);
+            showToast(`🚀 Zombies incoming! Defend your house with your ${state.sun} Suns ☀️!`);
           }
         } else if (newStatus === 'paused') {
           state.paused = true;
-          const titleEl = document.getElementById('studentWaitingTitle');
-          const subEl = document.getElementById('studentWaitingSub');
-          if (titleEl) titleEl.textContent = '⏸️ Class Paused by Teacher';
-          if (subEl) subEl.innerHTML = 'Eyes on your teacher! The game will resume when your teacher clicks <strong>Play</strong>.';
-          document.getElementById('studentWaitingOverlay')?.classList.remove('hidden');
+          document.getElementById('pauseOverlay')?.classList.remove('hidden');
         }
       }
 
@@ -2698,6 +3122,38 @@
           applyTeacherStatus(msg.status, msg.maxWaves, msg);
         }
       };
+
+      // Connect directly to Teacher's PeerJS room host across devices/iPads
+      destroyClassroomPeer();
+      function connectStudentPeerToHost() {
+        if (typeof Peer === 'undefined' || classroom.role !== 'student') return;
+        try {
+          const stuPeer = new Peer(undefined, { debug: 0 });
+          classroom.peer = stuPeer;
+          stuPeer.on('open', () => {
+            const conn = stuPeer.connect(getPeerHostId(cleanCode), { reliable: true });
+            classroom.studentConn = conn;
+            conn.on('open', () => {
+              const snap = buildStudentSnapshot();
+              try {
+                conn.send({ type: 'student_join', studentId: classroom.studentId, payload: snap });
+              } catch (e) {}
+            });
+            conn.on('data', (msg) => {
+              if (msg && msg.type === 'room_status' && msg.status) {
+                applyTeacherStatus(msg.status, msg.maxWaves, msg);
+              }
+            });
+            conn.on('close', () => {
+              classroom.studentConn = null;
+            });
+          });
+          stuPeer.on('error', (err) => {
+            console.warn('Student PeerJS connect notice:', err);
+          });
+        } catch (e) {}
+      }
+      connectStudentPeerToHost();
 
       const hasCloud = await initClassroomBackend();
       if (hasCloud && db && firebaseUser) {
@@ -2748,6 +3204,13 @@
             classroom.broadcastChannel.postMessage({ type: 'request_status', studentId: classroom.studentId, payload: fullSnap });
           }
         }
+        if (classroom.studentConn && classroom.studentConn.open) {
+          try {
+            classroom.studentConn.send({ type: 'student_state', studentId: classroom.studentId, payload: fullSnap });
+          } catch (e) {}
+        } else if (typeof Peer !== 'undefined' && (!classroom.peer || classroom.peer.destroyed)) {
+          connectStudentPeerToHost();
+        }
         if (db && firebaseUser && classroom.roomCode) {
           try {
             const stuRef = doc(db, 'artifacts', appId, 'public', 'data', 'student_states', `${classroom.roomCode}_${classroom.studentId}`);
@@ -2765,7 +3228,7 @@
       if (classroom.syncInterval) clearInterval(classroom.syncInterval);
       classroom.syncInterval = setInterval(sendStudentHeartbeat, jitteredIntervalMs);
 
-      showToast(`🎓 Joined Room ${cleanCode}! Waiting for teacher to start...`);
+      showToast(`☀️ Joined Room ${cleanCode}! Solve picture & audio cards now to earn Suns before your teacher starts!`);
     }
 
     /*************************************************************************
@@ -2783,9 +3246,9 @@
     window.addEventListener('DOMContentLoaded', () => {
       resizeCanvas();
       syncGlobalThemeIcons();
+      renderFamilySelectors();
       updateSunUI();
       loadNextCard(false);
-      setupSpeechRecognition();
       subscribeGlobalSharedDeck();
 
       // Seed selection & shovel buttons
@@ -2817,35 +3280,17 @@
         e.currentTarget.textContent = state.muted ? '🔇' : '🔊';
       });
 
-      // Pronunciation & Riddle Card Buttons
-      document.getElementById('btnSpeakMic')?.addEventListener('click', () => {
-        if (!recognition) {
-          showToast('🎤 Speech recognition not supported here — type your answer below!', true);
-          return;
-        }
-        if (isListening) {
-          try { recognition.stop(); } catch (e) {}
-        } else {
-          try { recognition.start(); } catch (e) {}
-        }
-      });
-      document.getElementById('btnHearWord')?.addEventListener('click', speakPromptOutLoud);
-      document.getElementById('btnSubmitTyped')?.addEventListener('click', () => {
-        const inp = document.getElementById('typedAnswerInput');
-        if (!inp) return;
-        handleAnswerSubmission(inp.value);
-        inp.value = '';
-      });
-      document.getElementById('typedAnswerInput')?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleAnswerSubmission(e.currentTarget.value);
-          e.currentTarget.value = '';
-        }
+      // Picture & Audio Quiz Card Buttons
+      document.getElementById('btnPlayPromptAudio')?.addEventListener('click', speakPromptOutLoud);
+      document.getElementById('quizModeSelect')?.addEventListener('change', (e) => {
+        state.quizMode = e.target.value;
+        loadNextCard(false);
       });
       document.getElementById('btnTeacherApprove')?.addEventListener('click', () => {
         if (classroom.role === 'student') return;
-        if (state.currentCard) handleAnswerSubmission(state.currentCard.answer);
+        if (state.currentCard) {
+          evaluateQuizChoice(true, null, state.currentCard.answer || state.currentCard.display);
+        }
       });
       document.getElementById('btnSkipCard')?.addEventListener('click', () => {
         loadNextCard(true);
@@ -2944,6 +3389,7 @@
       document.getElementById('btnExitTeacherMode')?.addEventListener('click', () => {
         classroom.role = 'solo';
         classroom.roomCode = '';
+        destroyClassroomPeer();
         if (classroom.hostHeartbeatInterval) clearInterval(classroom.hostHeartbeatInterval);
         if (classroom.unsubStudents) classroom.unsubStudents();
         applyRoleRestrictions();
@@ -3142,6 +3588,24 @@
         syncTeacherDeckToClass();
         document.getElementById('iconsModal')?.classList.add('hidden');
         showToast('🎨 Game icons updated & synced for everyone!');
+      });
+
+      // Family in House Selector Modal Wiring
+      document.getElementById('btnSelectFamily')?.addEventListener('click', () => {
+        renderFamilySelectors();
+        document.getElementById('familyModal')?.classList.remove('hidden');
+      });
+      document.getElementById('btnCloseFamilyModal')?.addEventListener('click', () => {
+        document.getElementById('familyModal')?.classList.add('hidden');
+      });
+      document.getElementById('btnSaveFamilyDone')?.addEventListener('click', () => {
+        document.getElementById('familyModal')?.classList.add('hidden');
+        showToast(`🏡 ${selectedFamilyIds.length} family member${selectedFamilyIds.length === 1 ? '' : 's'} inside the house!`);
+      });
+      document.getElementById('btnSelectAllFamily')?.addEventListener('click', () => {
+        selectedFamilyIds = FAMILY_MEMBER_OPTIONS.map((m) => m.id);
+        try { localStorage.setItem('pvz_selected_family_v1', JSON.stringify(selectedFamilyIds)); } catch (e) {}
+        renderFamilySelectors();
       });
 
       // Custom Questions Studio Modal Wiring (with Copy & Paste Image Support)
